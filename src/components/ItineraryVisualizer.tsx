@@ -190,7 +190,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         const fillH = (Math.min(1, spot.Cost / maxCostRef)) * (innerR * 2);
         const clipId = `cost-clip-${idx}-${spot.Day}-${itineraryId}`;
         defs.append('clipPath').attr('id', clipId).append('rect').attr('x', -innerR).attr('y', innerR - fillH).attr('width', innerR * 2).attr('height', fillH);
-        spotG.append('circle').attr('r', innerR).attr('fill', COLORS.costFill).attr('clip-path', `url(#${clipId})`);
+        spotG.append('circle').attr('r', innerR).attr('fill', COLORS.costFill).attr('clip-path', `url(#${clipId})`).attr('opacity', 0.7);
 
         //上半圓
         spotG.append('path').attr('d', arc({ startAngle: -Math.PI/2, endAngle: Math.PI/2})).attr('fill', '#fafafa');
@@ -212,7 +212,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             const diff = rating - i;
             // 確保填色百分比在 0-100 之間
             const fillPerc = Math.max(0, Math.min(1, diff)) * 100;
-            // 唯一的 ID，建議加上 spot.id 或 idx 防止多個景點時發生衝突
+            // 唯一的 ID，加上 spot.id 或 idx 防止多個景點時發生衝突
             const gradientId = `star-grad-${idx}-${spot.Day}-${i}`;
             
             // 1. 在既有的 defs 裡新增漸層定義
@@ -222,7 +222,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
                 .attr('x2', '100%').attr('y2', '0%');
             
             // 金色填充部分
-            grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#FFB800');
+            grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#ffae00');
             // 灰色剩餘部分 (使用相同 offset 創造出俐落的切割線)
             grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#E5E7EB');
 
@@ -237,7 +237,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         }
 
 
-        spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '6px').text(`$${spot.Cost}`);
+        spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-bold fill-slate-600').attr('font-size', '9px').text(`$${spot.Cost}`);
         spotG.append('text').attr('y', 55).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[11px] fill-slate-600').text(spot.SpotName);
 
         const drawSat = (satId: string, angle: number, icon: string, percentage: number, color: string) => {

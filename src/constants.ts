@@ -7,7 +7,7 @@ export const COLORS = {
   mental: '#D66D67',
   outline: '#E5E7EB',
   text: '#4B5563',
-  costFill: '#ffe796',
+  costFill: '#ffeba9',
   star: '#FFB800',
   transport: '#A5B4FC',
   timelineSpot: '#64748b',
