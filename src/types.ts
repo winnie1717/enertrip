@@ -21,6 +21,8 @@ export interface ItinerarySpot {
   IndoorOutdoor: "室內" | "戶外" | "半開放";
   WeatherType: string;
   Temperature: number;
+  // Fix: Added missing optional property present in constants.ts data
+  IsRealCoordinate?: boolean;
 }
 
 export interface ItineraryTransport {
