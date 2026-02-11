@@ -55,10 +55,18 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
     g.append('text')
       .attr('x', -100)
       .attr('y', -45)
+      .attr('class', 'font-bold fill-sky-500')
+      .attr('font-size', '14px')
+      .attr('letter-spacing', '0.05em')
+      .text(`DAY ${dayNumber}`);
+
+    g.append('text')
+      .attr('x', -100)
+      .attr('y', -25)
       .attr('class', 'font-black fill-gray-500')
       .attr('font-size', '14px')
       .attr('letter-spacing', '0.05em')
-      .text(`DAY ${dayNumber} — ${date}`);
+      .text(`${date}`);
 
     const getHours = (timeStr: string) => {
       const [h, m] = timeStr.split(':').map(Number);
@@ -74,6 +82,12 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
       const maxFatigue = Math.max(m.physical, m.mental);
       return timelineY - spotBaseAltitude - (maxFatigue * fatigueScale);
     };
+
+    // --- 分層渲染準備 (由下而上) ---
+    const layerTransports = g.append('g').attr('name', 'transports'); 
+    const layerHighlight = g.append('g').attr('name', 'highlight');  
+    const layerPoles = g.append('g').attr('name', 'poles');          
+    const layerSpots = g.append('g').attr('name', 'spots');    
 
     // 背景 24H 時間軸 Time scale based on the fixed reference length
     const timelineScale = d3.scaleLinear().domain([0, 24]).range([0, fixedTimelineLength]);
@@ -94,11 +108,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         .attr('class', 'text-[8px] font-black fill-slate-600')
         .text(`${h}:00`);
     });
-    // --- 分層渲染準備 (由下而上) ---
-    const layerTransports = g.append('g').attr('name', 'transports'); 
-    const layerHighlight = g.append('g').attr('name', 'highlight');  
-    const layerPoles = g.append('g').attr('name', 'poles');          
-    const layerSpots = g.append('g').attr('name', 'spots');          
+      
 
     // 2. 渲染邏輯
     items.forEach((item, idx) => {
@@ -165,7 +175,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           starG.append('text').attr('x', (i - 2) * 6).attr('text-anchor', 'middle').attr('font-size', '8px').attr('fill', i < Math.floor(spot.Rating) ? COLORS.star : '#9ca3ac').text('★');
         }
         spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '6px').text(`$${spot.Cost}`);
-        spotG.append('text').attr('y', 55).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[11px] fill-slate-800').text(spot.SpotName);
+        spotG.append('text').attr('y', 55).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[11px] fill-slate-600').text(spot.SpotName);
 
         const drawSat = (satId: string, angle: number, icon: string, percentage: number, color: string) => {
           const rad = (angle - 90) * (Math.PI / 180), dist = 55; 

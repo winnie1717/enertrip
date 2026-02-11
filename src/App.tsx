@@ -148,45 +148,6 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      {/* <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-50">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
-              T
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-800">府城之旅 <span className="text-indigo-600">全行程視覺化</span></h1>
-              <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Comprehensive Trip Engine</p>
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex bg-slate-100 p-1 rounded-xl">
-          <button
-            onClick={() => setActiveTab('visualizer')}
-            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              activeTab === 'visualizer' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            行程總覽
-          </button>
-          <button
-            onClick={() => setActiveTab('docs')}
-            className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-              activeTab === 'docs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            技術文件
-          </button>
-        </nav>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden md:block">
-            <p className="text-xs font-bold text-slate-700">共 {ALL_ITINERARIES.length} 個行程</p>
-            <p className="text-[10px] text-slate-400">府城漫步專案</p>
-          </div>
-        </div>
-      </header> */}
 
       <div className="flex-1 overflow-hidden">
         {/* 1. 修改 main：改成 overflow-hidden (外層不准捲) */}
