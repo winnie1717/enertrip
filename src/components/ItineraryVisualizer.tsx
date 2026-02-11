@@ -83,7 +83,9 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
       return timelineY - spotBaseAltitude - (maxFatigue * fatigueScale);
     };
 
+
     // --- 分層渲染準備 (由下而上) ---
+    const layerPath = g.append('g').attr('name', 'itinerary-path'); 
     const layerTransports = g.append('g').attr('name', 'transports'); 
     const layerHighlight = g.append('g').attr('name', 'highlight');  
     const layerPoles = g.append('g').attr('name', 'poles');          
@@ -108,6 +110,33 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         .attr('class', 'text-[8px] font-black fill-slate-600')
         .text(`${h}:00`);
     });
+
+    // 預先計算所有節點的座標，用於繪製背景連接線
+    const points: [number, number][] = items.map((item, idx) => {
+      const x = idx * itemSpacing;
+      if (item.DataType === "Spot") {
+        return [x, getSpotCenterY(item.SpotName)];
+      } else {
+        const prevSpot = items[idx - 1] as ItinerarySpot;
+        const nextSpot = items[idx + 1] as ItinerarySpot;
+        if (prevSpot && nextSpot) {
+          const yA = getSpotCenterY(prevSpot.SpotName);
+          const yB = getSpotCenterY(nextSpot.SpotName);
+          return [x, (yA + yB) / 2];
+        }
+        return [x, timelineY - spotBaseAltitude];
+      }
+    });
+
+    // 繪製背景連接線
+    const lineGenerator = d3.line().curve(d3.curveMonotoneX);
+    layerPath.append('path')
+      .attr('d', lineGenerator(points))
+      .attr('fill', 'none')
+      .attr('stroke', '#f0e2ee')
+      .attr('stroke-width', 2)
+      .attr('stroke-dasharray', '4,4') // 使用虛線增加層次感，也可改為實線
+      .attr('opacity', 0.8);
       
 
     // 2. 渲染邏輯
@@ -126,8 +155,8 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             .attr('cx', x)
             .attr('cy', centerY)
             .attr('r', 85) 
-            .attr('fill', '#D9C1BF')
-            .attr('stroke', '#A69296')
+            .attr('fill', '#d8b5b1')
+            .attr('stroke', '#a78b90')
             .attr('stroke-width', 0.5)
             .attr('opacity', 0.3);
         }
@@ -163,17 +192,51 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         defs.append('clipPath').attr('id', clipId).append('rect').attr('x', -innerR).attr('y', innerR - fillH).attr('width', innerR * 2).attr('height', fillH);
         spotG.append('circle').attr('r', innerR).attr('fill', COLORS.costFill).attr('clip-path', `url(#${clipId})`);
 
-        spotG.append('path').attr('d', arc({ startAngle: -Math.PI/2, endAngle: Math.PI/2 })).attr('fill', 'none').attr('stroke', COLORS.outline).attr('stroke-width', 0.3);
+        //上半圓
+        spotG.append('path').attr('d', arc({ startAngle: -Math.PI/2, endAngle: Math.PI/2})).attr('fill', '#fafafa');
         spotG.append('path').attr('d', arc({ startAngle: -Math.PI/2, endAngle: -Math.PI/2 + (Math.PI * (metrics.preference / 10)) })).attr('fill', COLORS.preference);
+        spotG.append('path').attr('d', arc({ startAngle: -Math.PI/2, endAngle: Math.PI/2 })).attr('fill', 'none').attr('stroke', COLORS.outline).attr('stroke-width', 0.5);
+        //下半圓
+        spotG.append('path').attr('d', arc({ startAngle: Math.PI * 1.5, endAngle: Math.PI * 0.5})).attr('fill', '#fafafa');
         const phArc = d3.arc<any>().innerRadius(innerR).outerRadius(midR);
         spotG.append('path').attr('d', phArc({ startAngle: Math.PI * 1.5, endAngle: Math.PI * 1.5 - (Math.PI * (metrics.physical / 10)) })).attr('fill', COLORS.physical);
+        spotG.append('path').attr('d', phArc({ startAngle: Math.PI * 1.5, endAngle: Math.PI * 0.5})).attr('fill', 'none').attr('stroke', COLORS.outline).attr('stroke-width', 0.5);
         const meArc = d3.arc<any>().innerRadius(midR).outerRadius(outerR);
         spotG.append('path').attr('d', meArc({ startAngle: Math.PI * 1.5, endAngle: Math.PI * 1.5 - (Math.PI * (metrics.mental / 10)) })).attr('fill', COLORS.mental);
+        spotG.append('path').attr('d', meArc({ startAngle: Math.PI * 1.5, endAngle: Math.PI * 0.5})).attr('fill', 'none').attr('stroke', COLORS.outline).attr('stroke-width', 0.5);
 
+        // 星星精確填色 (水平漸層)
+        const rating = spot.Rating || 0;
         const starG = spotG.append('g').attr('transform', 'translate(0, -2)');
         for (let i = 0; i < 5; i++) {
-          starG.append('text').attr('x', (i - 2) * 6).attr('text-anchor', 'middle').attr('font-size', '8px').attr('fill', i < Math.floor(spot.Rating) ? COLORS.star : '#9ca3ac').text('★');
+            const diff = rating - i;
+            // 確保填色百分比在 0-100 之間
+            const fillPerc = Math.max(0, Math.min(1, diff)) * 100;
+            // 唯一的 ID，建議加上 spot.id 或 idx 防止多個景點時發生衝突
+            const gradientId = `star-grad-${idx}-${spot.Day}-${i}`;
+            
+            // 1. 在既有的 defs 裡新增漸層定義
+            const grad = defs.append('linearGradient')
+                .attr('id', gradientId)
+                .attr('x1', '0%').attr('y1', '0%')
+                .attr('x2', '100%').attr('y2', '0%');
+            
+            // 金色填充部分
+            grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#FFB800');
+            // 灰色剩餘部分 (使用相同 offset 創造出俐落的切割線)
+            grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#E5E7EB');
+
+            // 2. 畫出星星文字，並套用這個漸層
+            starG.append('text')
+                .attr('x', (i - 2) * 8) // 控制星星之間的水平間距
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '10px')
+                .attr('fill', `url(#${gradientId})`) // 關鍵：引用上面的漸層 ID
+                .style('font-family', 'sans-serif')
+                .text('★');
         }
+
+
         spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '6px').text(`$${spot.Cost}`);
         spotG.append('text').attr('y', 55).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[11px] fill-slate-600').text(spot.SpotName);
 

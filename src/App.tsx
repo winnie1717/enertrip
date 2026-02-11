@@ -150,18 +150,11 @@ const App: React.FC = () => {
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
 
       <div className="flex-1 overflow-hidden">
-        {/* 1. 修改 main：改成 overflow-hidden (外層不准捲) */}
         <main className="h-full overflow-hidden p-6">
-        {/* <main className="h-full overflow-auto p-6"> */}
           {activeTab === 'visualizer' ? (
-            // 2. 修改容器：改成 h-full (鎖死高度，讓內部決定捲動)
             <div className="flex flex-col lg:flex-row gap-8 h-full">
-            {/* <div className="flex flex-col lg:flex-row gap-8 min-h-full"> */}
               {/* Left: Scrollable Itineraries List (3/4 Width) */}
-              {/* 3. 修改列表：這裡保留 overflow-y-auto，並加上 h-full */}
-              {/* 建議加個 pr-4 (padding-right) 讓捲軸不要壓到字 */}
               <div className="lg:w-3/4 flex flex-col gap-12 pb-20 overflow-y-auto custom-scrollbar h-full pr-4">
-              {/* <div className="lg:w-3/4 flex flex-col gap-12 pb-20 overflow-y-auto custom-scrollbar"> */}
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-0">
                     <div className="flex items-center gap-4 px-1">
