@@ -1,0 +1,142 @@
+
+// import { DayItinerary } from './types';
+import { type DayItinerary } from './types';
+
+export const COLORS = {
+  preference: '#9DB2D0',
+  physical: '#F4A442',
+  mental: '#D66D67',
+  outline: '#E5E7EB',
+  text: '#4B5563',
+  costFill: '#ffe796',
+  star: '#FFB800',
+  transport: '#A5B4FC',
+  timelineSpot: '#64748b',
+  timelineDot: '#3b82f6'
+};
+
+export const ITINERARY_DATA: DayItinerary = {
+  "id": 1,
+  "timestamp": "2026/1/8 上午2:45:51",
+  "result": [
+    {
+      "DataType": "Spot",
+      "Day": 1,
+      "Date": "2026-01-08",
+      "SpotName": "安平古堡",
+      "Address": "708台南市安平區國勝路82號",
+      "Latitude": 23.0016115,
+      "Longitude": 120.1605683,
+      "SpotType": ["古蹟", "文化"],
+      "Description": "台灣最古老的城堡，見證了台南數百年的歷史變遷。",
+      "Phone": "06-226-7348",
+      "Website": "",
+      "StartTime": "09:00",
+      "EndTime": "10:30",
+      "Rating": 4.2,
+      "Cost": 70,
+      "WalkingLoad": 6,
+      "InfoLoad": 7,
+      "CrowdLevel": 7,
+      "IndoorOutdoor": "半開放",
+      "WeatherType": "晴到多雲",
+      "Temperature": 22
+    },
+    {
+      "DataType": "Transport",
+      "Day": 1,
+      "TransportType": "步行",
+      "Distance": "0.5 km",
+      "Duration": "10 min",
+      "Speed": "3 km/h",
+      "Cost": 0
+    },
+    {
+      "DataType": "Spot",
+      "Day": 1,
+      "Date": "2026-01-08",
+      "SpotName": "安平樹屋",
+      "Address": "708台南市安平區古堡街108號",
+      "Latitude": 23.0040326,
+      "Longitude": 120.1597397,
+      "SpotType": ["古蹟", "風景"],
+      "Description": "原為德記洋行倉庫，後因榕樹盤根錯節形成獨特景觀。",
+      "Phone": "+886 06 391 3901",
+      "Website": "",
+      "StartTime": "10:40",
+      "EndTime": "12:00",
+      "Rating": 4.3,
+      "Cost": 50,
+      "WalkingLoad": 5,
+      "InfoLoad": 6,
+      "CrowdLevel": 6,
+      "IndoorOutdoor": "半開放",
+      "WeatherType": "晴到多雲",
+      "Temperature": 22
+    },
+    {
+      "DataType": "Transport",
+      "Day": 1,
+      "TransportType": "汽車",
+      "Distance": "1.5 km",
+      "Duration": "5 min",
+      "Speed": "20 km/h",
+      "Cost": 50
+    },
+    {
+      "DataType": "Spot",
+      "Day": 1,
+      "Date": "2026-01-08",
+      "SpotName": "周氏蝦捲",
+      "Address": "708台南市安平區安平路408-1號",
+      "Latitude": 22.9998218,
+      "Longitude": 120.1631901,
+      "SpotType": ["美食"],
+      "Description": "台南安平區的經典小吃，必嚐的道地美味。",
+      "Phone": "06-280-1304",
+      "Website": "",
+      "StartTime": "12:05",
+      "EndTime": "13:00",
+      "Rating": 4.1,
+      "Cost": 200,
+      "WalkingLoad": 2,
+      "InfoLoad": 2,
+      "CrowdLevel": 8,
+      "IndoorOutdoor": "室內",
+      "WeatherType": "晴到多雲",
+      "Temperature": 23
+    },
+    {
+      "DataType": "Transport",
+      "Day": 1,
+      "TransportType": "汽車",
+      "Distance": "4.5 km",
+      "Duration": "15 min",
+      "Speed": "18 km/h",
+      "Cost": 150
+    },
+    {
+      "DataType": "Spot",
+      "Day": 1,
+      "Date": "2026-01-08",
+      "SpotName": "赤崁樓",
+      "Address": "700台南市中西區民族路二段212號",
+      "Latitude": 22.9972744,
+      "Longitude": 120.2027032,
+      "SpotType": ["古蹟", "文化"],
+      "Description": "曾是荷蘭人的普羅民遮城，歷經鄭成功收復。",
+      "Phone": "+886 6 220 5647",
+      "Website": "",
+      "StartTime": "13:15",
+      "EndTime": "15:00",
+      "Rating": 4.4,
+      "Cost": 70,
+      "WalkingLoad": 6,
+      "InfoLoad": 7,
+      "CrowdLevel": 7,
+      "IndoorOutdoor": "半開放",
+      "WeatherType": "晴到多雲",
+      "Temperature": 24
+    }
+  ]
+};
