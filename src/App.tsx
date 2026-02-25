@@ -223,7 +223,7 @@ const App: React.FC = () => {
         {/* Filter Section */}
         <div className="flex-1 flex items-center justify-center gap-3 px-4">
           <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
-            <Calendar size={14} className="text-indigo-500" />
+            <Calendar size={14} className="text-slate-400" />
             <div className="flex items-center gap-1">
               <input 
                 type="date" 
@@ -246,7 +246,7 @@ const App: React.FC = () => {
               onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
               className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
             >
-              <Filter size={14} className="text-indigo-500" />
+              <Filter size={14} className="text-slate-400" />
               <span className="text-xs font-bold text-slate-700 min-w-[80px] text-left">
                 {selectedTypes.length === 0 ? "全部類型" : `已選 ${selectedTypes.length} 項`}
               </span>
@@ -441,16 +441,16 @@ const App: React.FC = () => {
                             </div>
                           </div>
 
-                          {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />}
+                          {/* {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />} */}
 
-                          <div className="bg-indigo-600 text-white p-6 rounded-[2rem]">
+                          {/* <div className="bg-indigo-600 text-white p-6 rounded-[2rem]">
                             <h3 className="font-bold mb-2 flex items-center gap-2">
                               <span>💡</span> 行程提醒
                             </h3>
                             <p className="text-xs opacity-90 leading-relaxed">
                               目前選中的景點是「{currentSpot.SpotName}」。建議根據此疲勞度評估是否需要調整後續景點的停留時間。
                             </p>
-                          </div>
+                          </div> */}
                         </>
                       ) : (
                         <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
