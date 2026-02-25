@@ -5,7 +5,8 @@ import MetricCards from './components/MetricCards';
 import TechnicalDocs from './components/TechnicalDocs';
 import { ALL_ITINERARIES, COLORS } from './constants';
 import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
-import { Calendar, Filter, ChevronDown, Search } from 'lucide-react';
+import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const CustomMetricSlider: React.FC<{
   label: string;
@@ -77,11 +78,13 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'visualizer' | 'docs'>('visualizer');
   const [metricsMap, setMetricsMap] = useState<Record<string, Metrics>>({});
   const [selectedSpotId, setSelectedSpotId] = useState<string>("");
-  
-      // Filter States
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // Filter States
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
-  const [selectedType, setSelectedType] = useState<string>("全部");
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
 
   // Extract all unique types and date range for defaults
   const allTypes = useMemo(() => {
@@ -93,7 +96,7 @@ const App: React.FC = () => {
         }
       });
     });
-    return ["全部", ...Array.from(types).sort()];
+    return Array.from(types).sort();
   }, []);
 
   const dateRange = useMemo(() => {
@@ -172,30 +175,47 @@ const App: React.FC = () => {
   };
 
   const processedSections = useMemo(() => {
-    return ALL_ITINERARIES.map(it => {
-      const days = getDaysGrouped(it);
-      return {
-        itinerary: it,
-        days: days.map(([dayNum, dayData]) => ({
-          originalDay: Number(dayNum),
-          data: dayData
-        }))
-      };
-    });
-  }, []);
+    return ALL_ITINERARIES
+      .filter(it => {
+        // Date filter: check if any spot in itinerary is within range
+        const hasDateMatch = it.result.some(item => 
+          item.DataType === "Spot" && 
+          (!startDate || item.Date >= startDate) && 
+          (!endDate || item.Date <= endDate)
+        );
+        
+        // Type filter: check if any spot in itinerary matches selected types
+        const hasTypeMatch = selectedTypes.length === 0 || it.result.some(item => 
+          item.DataType === "Spot" && item.SpotType.some(t => selectedTypes.includes(t))
+        );
+
+        return hasDateMatch && hasTypeMatch;
+      })
+      .map(it => {
+        const days = getDaysGrouped(it);
+        return {
+          itinerary: it,
+          days: days.map(([dayNum, dayData]) => ({
+            originalDay: Number(dayNum),
+            data: dayData
+          }))
+        };
+      });
+  }, [startDate, endDate, selectedTypes]);
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-
-            <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-100 shadow-sm">
+      <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-100">
         <div className="flex items-center gap-6 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
-              T
+            <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
+              EnT
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-slate-800 leading-tight">EnerTrip <span className="text-indigo-600">視覺化</span></h1>
-              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Trip Engine</p>
+              <h1 className="text-lg font-bold text-slate-800 leading-tight">EnerTrip 
+                {/* <span className="text-indigo-600">視覺化</span> */}
+              </h1>
+              {/* <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Trip Engine</p> */}
             </div>
           </div>
         </div>
@@ -221,29 +241,69 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors relative">
-            <Filter size={14} className="text-indigo-500" />
-            <div className="relative flex items-center">
-              <select 
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer appearance-none pr-5 min-w-[80px]"
-              >
-                {allTypes.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
-              <ChevronDown size={12} className="text-slate-400 absolute right-0 pointer-events-none" />
-            </div>
+          <div className="relative">
+            <button 
+              onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
+              className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
+            >
+              <Filter size={14} className="text-indigo-500" />
+              <span className="text-xs font-bold text-slate-700 min-w-[80px] text-left">
+                {selectedTypes.length === 0 ? "全部類型" : `已選 ${selectedTypes.length} 項`}
+              </span>
+              <ChevronDown size={12} className={`text-slate-400 transition-transform ${isTypeDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <AnimatePresence>
+              {isTypeDropdownOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-30" 
+                    onClick={() => setIsTypeDropdownOpen(false)} 
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl z-40 p-2 max-h-64 overflow-y-auto custom-scrollbar"
+                  >
+                    <div className="flex flex-col gap-1">
+                      <button
+                        onClick={() => setSelectedTypes([])}
+                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTypes.length === 0 ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                      >
+                        全部
+                      </button>
+                      <div className="h-px bg-slate-50 my-1" />
+                      {allTypes.map(type => (
+                        <button
+                          key={type}
+                          onClick={() => {
+                            setSelectedTypes(prev => 
+                              prev.includes(type) 
+                                ? prev.filter(t => t !== type) 
+                                : [...prev, type]
+                            );
+                          }}
+                          className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTypes.includes(type) ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`}
+                        >
+                          {type}
+                          {selectedTypes.includes(type) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 shrink-0">
+        {/* <div className="flex items-center gap-6 shrink-0">
           <nav className="flex bg-slate-100 p-1 rounded-xl">
             <button
               onClick={() => setActiveTab('visualizer')}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'visualizer' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'visualizer' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               行程總覽
@@ -251,7 +311,7 @@ const App: React.FC = () => {
             <button
               onClick={() => setActiveTab('docs')}
               className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'docs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                activeTab === 'docs' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'
               }`}
             >
               技術文件
@@ -262,25 +322,42 @@ const App: React.FC = () => {
             <p className="text-xs font-bold text-slate-700">篩選出 {processedSections.length} 個行程</p>
             <p className="text-[10px] text-slate-400">府城漫步專案</p>
           </div>
-        </div>
+        </div> */}
+        
       </header>
 
       <div className="flex-1 overflow-hidden">
-        <main className="h-full overflow-hidden p-6">
+        <main className="h-full overflow-y-auto custom-scrollbar p-6">
           {activeTab === 'visualizer' ? (
-            <div className="flex flex-col lg:flex-row gap-8 h-full">
-              {/* Left: Scrollable Itineraries List (3/4 Width) */}
-              <div className="lg:w-3/4 flex flex-col gap-12 pb-20 overflow-y-auto custom-scrollbar h-full pr-4">
+            <div className="flex flex-col lg:flex-row gap-8 min-h-full relative">
+              {/* Toggle Button (Bump) */}
+              <motion.button
+                initial={false}
+                animate={{ x: 0 }}
+                whileHover={{ x: -4 }}
+                onClick={() => setIsPanelOpen(!isPanelOpen)}
+                className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-slate-200 border-r-0 py-4 px-2 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-slate-50"
+              >
+                <div className={`p-2 rounded-lg ${isPanelOpen ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'} group-hover:bg-indigo-600 group-hover:text-white transition-colors`}>
+                  <Sliders size={18} />
+                </div>
+              </motion.button>
+
+              {/* Left: Scrollable Itineraries List */}
+              <motion.div 
+                layout
+                className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}
+              >
                 {processedSections.map((itSection) => (
-                  <div key={itSection.itinerary.id} className="flex flex-col gap-0">
-                    <div className="flex items-center gap-4 px-1">
-                      <h2 className="text-xl font-black tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
-                      {/* <div className="h-px flex-1 bg-slate-50" /> */}
+                  <div key={itSection.itinerary.id} className="flex flex-col gap-2">
+                    <div className="flex items-center gap-4 px-2">
+                      <h2 className="text-sm font-black text-slate-400 tracking-tight uppercase"># 行程 {itSection.itinerary.id}</h2>
+                      <div className="h-px flex-1 bg-slate-50" />
                     </div>
                     
                     <div className="flex flex-col gap-0">
                       {itSection.days.map((day) => (
-                        <div key={`${itSection.itinerary.id}-${day.originalDay}`} className="flex flex-col mb-4 bg-white rounded-3xl p-2">
+                        <div key={`${itSection.itinerary.id}-${day.originalDay}`} className="flex flex-col mb-1 bg-white rounded-2xl border border-slate-50 p-1">
                           <div className="overflow-x-auto custom-scrollbar">
                             <ItineraryVisualizer 
                               items={day.data.items} 
@@ -297,73 +374,93 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 ))}
-              </div>
+              </motion.div>
 
-              {/* Right: Adjustment Panel (1/4 Width) */}
-              <div className="lg:w-1/4 flex flex-col gap-6 sticky top-0 h-fit pb-12">
-                {currentSpot ? (
-                  <>
-                    <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-50">
-                      <div className="mb-8">
-                        {/* <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest mb-1">
-                          正在調整
-                        </div> */}
-                        <h2 className="text-2xl font-black text-slate-800 mb-1 leading-tight">{currentSpot.SpotName}</h2>
-                        <div className="flex flex-col gap-1 text-slate-400 text-xs mt-2">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-500">時間</span>
-                            <span>{currentSpot.StartTime} - {currentSpot.EndTime}</span>
+              {/* Right: Adjustment Panel (Collapsible) */}
+              <AnimatePresence>
+                {isPanelOpen && (
+                  <motion.div 
+                    initial={{ width: 0, opacity: 0, x: 20 }}
+                    animate={{ width: 'auto', opacity: 1, x: 0 }}
+                    exit={{ width: 0, opacity: 0, x: 20 }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="hidden lg:flex flex-col gap-6 sticky top-0 h-fit pb-12 z-30"
+                  >
+                    <div className="w-[320px] xl:w-[400px] pt-2">
+                      {currentSpot ? (
+                        <>
+                          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100">
+                            <div className="mb-8">
+                              <div className="flex justify-between items-start mb-1">
+                                <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                                  正在調整
+                                </div>
+                                <button 
+                                  onClick={() => setIsPanelOpen(false)}
+                                  className="text-slate-300 hover:text-slate-500 transition-colors"
+                                >
+                                  <ChevronRight size={16} />
+                                </button>
+                              </div>
+                              <h2 className="text-2xl font-black text-slate-800 mb-1 leading-tight">{currentSpot.SpotName}</h2>
+                              <div className="flex flex-col gap-1 text-slate-400 text-xs mt-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-500">時間</span>
+                                  <span>{currentSpot.StartTime} - {currentSpot.EndTime}</span>
+                                </div>
+                                <div className="flex items-start gap-2">
+                                  <span className="font-bold text-slate-500 shrink-0">地址</span>
+                                  <span className="break-words">{currentSpot.Address}</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-4">
+                              {metricsMap[selectedSpotId] && (
+                                <>
+                                  <CustomMetricSlider 
+                                    label="偏好"
+                                    value={metricsMap[selectedSpotId].preference}
+                                    color={COLORS.preference}
+                                    onChange={(val) => handleUpdateMetrics({ preference: val })}
+                                  />
+                                  <CustomMetricSlider 
+                                    label="生理疲勞"
+                                    value={metricsMap[selectedSpotId].physical}
+                                    color={COLORS.physical}
+                                    onChange={(val) => handleUpdateMetrics({ physical: val })}
+                                  />
+                                  <CustomMetricSlider 
+                                    label="心理疲勞"
+                                    value={metricsMap[selectedSpotId].mental}
+                                    color={COLORS.mental}
+                                    onChange={(val) => handleUpdateMetrics({ mental: val })}
+                                  />
+                                </>
+                              )}
+                            </div>
                           </div>
-                          {/* <div className="flex items-start gap-2">
-                            <span className="font-bold text-slate-500 shrink-0">地址</span>
-                            <span className="break-words">{currentSpot.Address}</span>
-                          </div> */}
+
+                          {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />}
+
+                          <div className="bg-indigo-600 text-white p-6 rounded-[2rem]">
+                            <h3 className="font-bold mb-2 flex items-center gap-2">
+                              <span>💡</span> 行程提醒
+                            </h3>
+                            <p className="text-xs opacity-90 leading-relaxed">
+                              目前選中的景點是「{currentSpot.SpotName}」。建議根據此疲勞度評估是否需要調整後續景點的停留時間。
+                            </p>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
+                          <p className="text-slate-400 font-bold text-sm">點擊左側景點以進行調整</p>
                         </div>
-                      </div>
-                      
-                      <div className="mt-4">
-                        {metricsMap[selectedSpotId] && (
-                          <>
-                            <CustomMetricSlider 
-                              label="偏好"
-                              value={metricsMap[selectedSpotId].preference}
-                              color={COLORS.preference}
-                              onChange={(val) => handleUpdateMetrics({ preference: val })}
-                            />
-                            <CustomMetricSlider 
-                              label="生理疲勞"
-                              value={metricsMap[selectedSpotId].physical}
-                              color={COLORS.physical}
-                              onChange={(val) => handleUpdateMetrics({ physical: val })}
-                            />
-                            <CustomMetricSlider 
-                              label="心理疲勞"
-                              value={metricsMap[selectedSpotId].mental}
-                              color={COLORS.mental}
-                              onChange={(val) => handleUpdateMetrics({ mental: val })}
-                            />
-                          </>
-                        )}
-                      </div>
+                      )}
                     </div>
-
-                    {/* {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />}
-
-                    <div className="bg-indigo-600 text-white p-6 rounded-[2rem] shadow-md">
-                      <h3 className="font-bold mb-2 flex items-center gap-2">
-                        <span>💡</span> 行程提醒
-                      </h3>
-                      <p className="text-xs opacity-90 leading-relaxed">
-                        目前選中的景點是「{currentSpot.SpotName}」。建議根據此疲勞度評估是否需要調整後續景點的停留時間。
-                      </p>
-                    </div> */}
-                  </>
-                ) : (
-                  <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
-                    <p className="text-slate-400 font-bold text-sm">點擊左側景點以進行調整</p>
-                  </div>
+                  </motion.div>
                 )}
-              </div>
+              </AnimatePresence>
             </div>
           ) : (
             <TechnicalDocs />
@@ -375,6 +472,7 @@ const App: React.FC = () => {
         <div>視覺化核心: D3.js + React SVG Engine</div>
         <div>佈局模式: 3:1 Responsive Canvas</div>
       </footer> */}
+      
     </div>
   );
 };
