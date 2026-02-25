@@ -5,6 +5,7 @@ import MetricCards from './components/MetricCards';
 import TechnicalDocs from './components/TechnicalDocs';
 import { ALL_ITINERARIES, COLORS } from './constants';
 import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
+import { Calendar, Filter, ChevronDown, Search } from 'lucide-react';
 
 const CustomMetricSlider: React.FC<{
   label: string;
@@ -76,6 +77,43 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'visualizer' | 'docs'>('visualizer');
   const [metricsMap, setMetricsMap] = useState<Record<string, Metrics>>({});
   const [selectedSpotId, setSelectedSpotId] = useState<string>("");
+  
+      // Filter States
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("全部");
+
+  // Extract all unique types and date range for defaults
+  const allTypes = useMemo(() => {
+    const types = new Set<string>();
+    ALL_ITINERARIES.forEach(it => {
+      it.result.forEach(item => {
+        if (item.DataType === "Spot") {
+          item.SpotType.forEach(t => types.add(t));
+        }
+      });
+    });
+    return ["全部", ...Array.from(types).sort()];
+  }, []);
+
+  const dateRange = useMemo(() => {
+    let min = "";
+    let max = "";
+    ALL_ITINERARIES.forEach(it => {
+      it.result.forEach(item => {
+        if (item.DataType === "Spot") {
+          if (!min || item.Date < min) min = item.Date;
+          if (!max || item.Date > max) max = item.Date;
+        }
+      });
+    });
+    return { min, max };
+  }, []);
+
+  useEffect(() => {
+    if (!startDate && dateRange.min) setStartDate(dateRange.min);
+    if (!endDate && dateRange.max) setEndDate(dateRange.max);
+  }, [dateRange]);
 
   useEffect(() => {
     const initial: Record<string, Metrics> = {};
@@ -148,6 +186,84 @@ const App: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
+
+            <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-100 shadow-sm">
+        <div className="flex items-center gap-6 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
+              T
+            </div>
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-bold text-slate-800 leading-tight">EnerTrip <span className="text-indigo-600">視覺化</span></h1>
+              <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Trip Engine</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Section */}
+        <div className="flex-1 flex items-center justify-center gap-3 px-4">
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
+            <Calendar size={14} className="text-indigo-500" />
+            <div className="flex items-center gap-1">
+              <input 
+                type="date" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+              />
+              <span className="text-slate-300 text-[10px]">至</span>
+              <input 
+                type="date" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors relative">
+            <Filter size={14} className="text-indigo-500" />
+            <div className="relative flex items-center">
+              <select 
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer appearance-none pr-5 min-w-[80px]"
+              >
+                {allTypes.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <ChevronDown size={12} className="text-slate-400 absolute right-0 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-6 shrink-0">
+          <nav className="flex bg-slate-100 p-1 rounded-xl">
+            <button
+              onClick={() => setActiveTab('visualizer')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'visualizer' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              行程總覽
+            </button>
+            <button
+              onClick={() => setActiveTab('docs')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                activeTab === 'docs' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              技術文件
+            </button>
+          </nav>
+          
+          <div className="text-right hidden lg:block">
+            <p className="text-xs font-bold text-slate-700">篩選出 {processedSections.length} 個行程</p>
+            <p className="text-[10px] text-slate-400">府城漫步專案</p>
+          </div>
+        </div>
+      </header>
 
       <div className="flex-1 overflow-hidden">
         <main className="h-full overflow-hidden p-6">

@@ -212,10 +212,10 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             const diff = rating - i;
             // 確保填色百分比在 0-100 之間
             const fillPerc = Math.max(0, Math.min(1, diff)) * 100;
-            // 唯一的 ID，加上 spot.id 或 idx 防止多個景點時發生衝突
+            // 唯一的 ID 加上 spot.id 或 idx 防止多個景點時發生衝突
             const gradientId = `star-grad-${idx}-${spot.Day}-${i}`;
             
-            // 1. 在既有的 defs 裡新增漸層定義
+            // 在既有的 defs 裡新增漸層定義
             const grad = defs.append('linearGradient')
                 .attr('id', gradientId)
                 .attr('x1', '0%').attr('y1', '0%')
@@ -226,12 +226,12 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             // 灰色剩餘部分 (使用相同 offset 創造出俐落的切割線)
             grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#E5E7EB');
 
-            // 2. 畫出星星文字，並套用這個漸層
+            // 畫出星星文字，並套用這個漸層
             starG.append('text')
                 .attr('x', (i - 2) * 8) // 控制星星之間的水平間距
                 .attr('text-anchor', 'middle')
                 .attr('font-size', '10px')
-                .attr('fill', `url(#${gradientId})`) // 關鍵：引用上面的漸層 ID
+                .attr('fill', `url(#${gradientId})`) // 引用上面的漸層 ID
                 .style('font-family', 'sans-serif')
                 .text('★');
         }
