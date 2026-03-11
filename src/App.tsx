@@ -338,15 +338,17 @@ const App: React.FC = () => {
                 onClick={() => setIsPanelOpen(!isPanelOpen)}
                 className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-slate-200 border-r-0 py-4 px-2 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-slate-50"
               >
-                <div className={`p-2 rounded-lg ${isPanelOpen ? 'bg-pink-50 text-pink-600' : 'bg-slate-100 text-slate-400'} group-hover:bg-pink-600 group-hover:text-white transition-colors`}>
-                  <Sliders size={18} />
+                <div className={`p-2 rounded-lg ${isPanelOpen ? 'text-slate-300' : 'text-slate-500 transition-colors'} group-hover:text-slate-500 transition-colors`}>
+                  <ChevronLeft size={16} />
                 </div>
+                
               </motion.button>
 
               {/* Left: Scrollable Itineraries List */}
               <motion.div 
                 layout
-                className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}
+                // className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}// 動態空出右邊面板的寬度
+                className={`flex-1 flex flex-col gap-4 pb-20 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
               >
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-2">
@@ -384,12 +386,14 @@ const App: React.FC = () => {
                     animate={{ width: 'auto', opacity: 1, x: 0 }}
                     exit={{ width: 0, opacity: 0, x: 20 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="hidden lg:flex flex-col gap-6 sticky top-0 h-fit pb-12 z-30"
+                    // className="hidden lg:flex flex-col gap-6 sticky top-0 h-fit pb-12 z-30"
+                    // 關鍵修改：fixed, top-0, right-0, h-screen
+                    className="fixed top-0 right-0 h-screen w-96 bg-white z-50 overflow-y-auto rounded-[1rem] border border-slate-200" // 固定在右邊
                   >
                     <div className="w-[320px] xl:w-[400px] pt-2">
                       {currentSpot ? (
                         <>
-                          <div className="bg-white p-6 rounded-[2.5rem] border border-slate-100">
+                          <div className="bg-white p-6">
                             <div className="mb-8">
                               <div className="flex justify-between items-start mb-1">
                                 <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
