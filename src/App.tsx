@@ -221,7 +221,7 @@ const App: React.FC = () => {
         </div>
 
         {/* Filter Section */}
-        <div className="flex-1 flex items-center justify-center gap-3 px-4">
+        <div className="flex-1 flex items-center gap-3 pl-10">
           <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
             <Calendar size={14} className="text-slate-400" />
             <div className="flex items-center gap-1">
@@ -327,7 +327,7 @@ const App: React.FC = () => {
       </header>
 
       <div className="flex-1 overflow-hidden">
-        <main className="h-full overflow-y-auto custom-scrollbar p-6">
+        <main className="h-full overflow-y-auto p-6">
           {activeTab === 'visualizer' ? (
             <div className="flex flex-col lg:flex-row gap-8 min-h-full relative">
               {/* Toggle Button (Bump) */}

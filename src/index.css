@@ -68,3 +68,9 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* 針對主內容區域隱藏滾動條 */
+main.overflow-y-auto {
+  -ms-overflow-style: none;  /* 針對 IE 和 Edge */
+  scrollbar-width: none;     /* 針對 Firefox */
+}

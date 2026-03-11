@@ -188,16 +188,39 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         // 星星精確填色 (水平漸層)
         const rating = spot.Rating || 0;
         const starG = spotG.append('g').attr('transform', 'translate(0, -2)');
+        // 假設原本星星的基礎位置是 spotX
         for (let i = 0; i < 5; i++) {
           const diff = rating - i;
           // 確保填色百分比在 0-100 之間
-          const fillPerc = Math.max(0, Math.min(1, diff)) * 100;
+          const fillPerc = Math.max(0, Math.min(100, diff * 100));
           // 唯一的 ID 加上 spot.id 或 idx 防止多個景點時發生衝突
-          const gradientId = `star-grad-${idx}-${spot.Day}-${itineraryId}-${i}`;
+          const starId = `star-grad-${idx}-${spot.Day}-${itineraryId}-${i}`;
+          
+          // --- 修改排列邏輯 ---
+          let starX, starY;
+          const starSize = 12; // 星星大小
+          const gap = 0;       // 星星間距
+          
+          if (i < 2) {
+            // 上面兩顆：i 為 0, 1
+            // 置中算法：(i - 0.5) * (大小 + 間距)
+            starX = (i - 0.5) * (starSize + gap);
+            starY = -10; // 第一排的高度（往上移）
+          } else {
+            // 下面三顆：i 為 2, 3, 4
+            // 置中算法：(i - 3) * (大小 + 間距)
+            starX = (i - 3) * (starSize + gap);
+            starY = 0;   // 第二排的高度（原本高度）
+          }
+
+          //  建立星星的群組並設定位移
+          const starGroup = starG.append('g')
+            // 將計算好的 starX, starY 套用到 transform
+            .attr('transform', `translate(${starX}, ${starY})`);
           
           // 在既有的 defs 裡新增漸層定義
           const grad = defs.append('linearGradient')
-            .attr('id', gradientId)
+            .attr('id', starId)
             .attr('x1', '0%').attr('y1', '0%')
             .attr('x2', '100%').attr('y2', '0%');
           
@@ -206,16 +229,16 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           // 灰色剩餘部分 (使用相同 offset 創造出俐落的切割線)
           grad.append('stop').attr('offset', `${fillPerc}%`).attr('stop-color', '#E5E7EB');
 
-          // 畫出星星文字，並套用這個漸層
-          starG.append('text')
-            .attr('x', (i - 2) * 8) // 控制星星之間的水平間距
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '10px')
-            .attr('fill', `url(#${gradientId})`) // 引用上面的漸層 ID
-            .style('font-family', 'sans-serif')
-            .text('★');
+          // 畫出星星路徑，並套用這個漸層
+          starGroup.append('path')
+            // 這串 D 是標準星星形狀，中心點大約在 (6, 6)
+            .attr('d', "M6 0L7.4 4.3H12L8.3 7L9.7 11.3L6 8.6L2.3 11.3L3.7 7L0 4.3H4.6L6 0Z")//星星svg
+            .attr('fill', `url(#${starId})`)
+            // 重點：translate(-6, -6) 是為了讓星星的中心對準 starGroup 的 (0,0)
+            .attr('transform', `scale(0.8) translate(-6, -6)`);
+          
         }
-        spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '6px').text(`$${spot.Cost}`);
+        spotG.append('text').attr('y', 15).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '10px').text(`$${spot.Cost}`);
         spotG.append('text').attr('y', 51.5).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[10px] fill-slate-800').text(spot.SpotName);
 
         const drawSat = (satId: string, angle: number, icon: string, percentage: number, color: string) => {
