@@ -208,9 +208,9 @@ const App: React.FC = () => {
       <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-100">
         <div className="flex items-center gap-6 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
+            {/* <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
               EnT
-            </div>
+            </div> */}
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-slate-800 leading-tight">EnerTrip 
                 {/* <span className="text-indigo-600">視覺化</span> */}
@@ -338,7 +338,7 @@ const App: React.FC = () => {
                 onClick={() => setIsPanelOpen(!isPanelOpen)}
                 className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-slate-200 border-r-0 py-4 px-2 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-slate-50"
               >
-                <div className={`p-2 rounded-lg ${isPanelOpen ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'} group-hover:bg-indigo-600 group-hover:text-white transition-colors`}>
+                <div className={`p-2 rounded-lg ${isPanelOpen ? 'bg-pink-50 text-pink-600' : 'bg-slate-100 text-slate-400'} group-hover:bg-pink-600 group-hover:text-white transition-colors`}>
                   <Sliders size={18} />
                 </div>
               </motion.button>
@@ -351,7 +351,7 @@ const App: React.FC = () => {
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-2">
                     <div className="flex items-center gap-4 px-2">
-                      <h2 className="text-sm font-black text-slate-400 tracking-tight uppercase"># 行程 {itSection.itinerary.id}</h2>
+                      <h2 className="text-sm font-black text-slate-400 tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
                       <div className="h-px flex-1 bg-slate-50" />
                     </div>
                     

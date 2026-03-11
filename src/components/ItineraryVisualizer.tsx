@@ -34,7 +34,8 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
     const spotBaseAltitude = 54; 
     const fatigueScale = 10;     
 
-    const fixedTimelineLength = 600; 
+    //24h時間軸
+    const fixedTimelineLength = 1000; 
     
     const contentWidth = Math.max(fixedTimelineLength, (items.length - 1) * itemSpacing);
     const totalWidth = contentWidth + margin.left + margin.right;
@@ -215,7 +216,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             .text('★');
         }
         spotG.append('text').attr('y', 10).attr('text-anchor', 'middle').attr('class', 'font-black fill-slate-400').attr('font-size', '6px').text(`$${spot.Cost}`);
-        spotG.append('text').attr('y', 47.5).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[10px] fill-slate-800').text(spot.SpotName);
+        spotG.append('text').attr('y', 51.5).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[10px] fill-slate-800').text(spot.SpotName);
 
         const drawSat = (satId: string, angle: number, icon: string, percentage: number, color: string) => {
           const rad = (angle - 90) * (Math.PI / 180), dist = 52; 
