@@ -463,17 +463,6 @@ const App: React.FC = () => {
                               )}
                             </div> */}
                           </div>
-
-                          {/* {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />} */}
-
-                          {/* <div className="bg-indigo-600 text-white p-6 rounded-[2rem]">
-                            <h3 className="font-bold mb-2 flex items-center gap-2">
-                              <span>💡</span> 行程提醒
-                            </h3>
-                            <p className="text-xs opacity-90 leading-relaxed">
-                              目前選中的景點是「{currentSpot.SpotName}」。建議根據此疲勞度評估是否需要調整後續景點的停留時間。
-                            </p>
-                          </div> */}
                         </>
                       ) : (
                         <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
@@ -495,9 +484,18 @@ const App: React.FC = () => {
                     // 計算位置：出現在滑鼠右方，並往上偏移一點以防擋住點擊點
                     style={{
                       position: 'fixed',
-                      left: anchorEl.x + 20,
-                      top: anchorEl.y - 120,
                       zIndex: 100,
+                      // --- 水平位置判斷 ---
+                      // 如果點擊位置在螢幕右半邊，視窗改往左邊彈 (減去視窗寬度約 300px)
+                      left: anchorEl.x > window.innerWidth / 2 
+                        ? anchorEl.x - 300 
+                        : anchorEl.x + 20,
+                        
+                      // --- 垂直位置判斷 ---
+                      // 如果點擊位置在螢幕下半邊，視窗往上彈，否則往下彈
+                      top: anchorEl.y > window.innerHeight / 2 
+                        ? anchorEl.y - 340  // 往上彈
+                        : anchorEl.y - 20,   // 往下彈
                     }}
                     className="w-72 bg-white/95 backdrop-blur-sm p-6 rounded-[2rem] shadow-2xl border border-slate-100"
                   >
@@ -510,7 +508,7 @@ const App: React.FC = () => {
                         onClick={() => setShowFloating(false)}
                         className="p-1 hover:bg-slate-100 rounded-full text-slate-400"
                       >
-                        <ChevronRight size={16} />
+                        <ChevronDown size={16} />
                       </button>
                     </div>
 
