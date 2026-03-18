@@ -11,8 +11,16 @@ export const COLORS = {
   star: '#FFB800',
   transport: '#A5B4FC',
   timelineSpot: '#64748b',
-  timelineDot: '#3b82f6'
+  timelineDot: '#3b82f6',
+  test: '#6a68dd',
+  color1: '#FFFB96',
+  color2: '#FFE28A',
+  color3: '#FFD2A8',
+  color4: '#FFCDDB',
+  color5: '#CDB9FE'
 };
+
+
 
 export const ALL_ITINERARIES: DayItinerary[] = [
   {

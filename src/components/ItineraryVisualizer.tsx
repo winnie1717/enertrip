@@ -54,7 +54,8 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
     g.append('text')
       .attr('x', -100)
       .attr('y', -45)
-      .attr('class', 'font-black fill-indigo-600')
+      .attr('class', 'font-black')
+      .attr('fill','#A3A5D9')
       .attr('font-size', '13px')
       .attr('letter-spacing', '0.05em')
       .text(`DAY ${dayNumber} — ${date}`);

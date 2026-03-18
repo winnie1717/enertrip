@@ -7,6 +7,7 @@ import { ALL_ITINERARIES, COLORS } from './constants';
 import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
 import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import MapComponent from './components/MapComponent';
 
 
 const CustomMetricSlider: React.FC<{
@@ -50,14 +51,14 @@ const CustomMetricSlider: React.FC<{
   const percentage = ((value - 1) / 9) * 100;
 
   return (
-    <div className="mb-8 select-none">
-      <div className="flex justify-between items-center mb-3">
-        <label className="text-lg font-medium text-slate-500 tracking-tight">{label}</label>
+    <div className="mb-3 select-none">
+      <div className="flex justify-between items-center mb-1.5">
+        <label className="text-[17px] font-medium text-slate-600 tracking-tight">{label}</label>
       </div>
       <div 
         ref={trackRef}
         onMouseDown={handleMouseDown}
-        className="relative h-6 w-full bg-[#E9EDF2] rounded-full cursor-pointer flex items-center"
+        className="relative h-4 w-full bg-[#E9EDF2] rounded-full cursor-pointer flex items-center"
       >
         <div 
           className="absolute h-full rounded-full transition-all duration-75"
@@ -227,7 +228,7 @@ const App: React.FC = () => {
               EnT
             </div> */}
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-slate-800 leading-tight">EnerTrip 
+              <h1 className="text-lg font-bold text-[#9FA3A6] leading-tight">EnerTrip 
                 {/* <span className="text-indigo-600">視覺化</span> */}
               </h1>
               {/* <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Trip Engine</p> */}
@@ -311,37 +312,10 @@ const App: React.FC = () => {
               )}
             </AnimatePresence>
           </div>
-        </div>
-
-        {/* <div className="flex items-center gap-6 shrink-0">
-          <nav className="flex bg-slate-100 p-1 rounded-xl">
-            <button
-              onClick={() => setActiveTab('visualizer')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'visualizer' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              行程總覽
-            </button>
-            <button
-              onClick={() => setActiveTab('docs')}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                activeTab === 'docs' ? 'bg-white text-indigo-600' : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              技術文件
-            </button>
-          </nav>
-          
-          <div className="text-right hidden lg:block">
-            <p className="text-xs font-bold text-slate-700">篩選出 {processedSections.length} 個行程</p>
-            <p className="text-[10px] text-slate-400">府城漫步專案</p>
-          </div>
-        </div> */}
-        
+        </div>        
       </header>
 
-      {/* 右邊展開區塊 */}
+      {/* 主要畫面 */}
       <div className="flex-1 overflow-hidden">
         <main className="h-full overflow-y-auto p-3">
           {activeTab === 'visualizer' ? (
@@ -364,18 +338,23 @@ const App: React.FC = () => {
               <motion.div 
                 layout
                 // className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}// 動態空出右邊面板的寬度
-                className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
+                // className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
+                // 修正：使用 pr (padding-right) 或是讓 flex-1 自動處理寬度
+                className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${
+                  isPanelOpen ? 'lg:pr-[400px]' : 'pr-0'
+                }`}
               >
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-2">
                     <div className="flex items-center gap-4 px-2">
-                      <h2 className="text-sm font-black text-slate-400 tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
+                      <h2 className="text-sm font-black text-[#8D8BD9] tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
                       <div className="h-px flex-1 bg-slate-50" />
                     </div>
                     
                     <div className="flex flex-col gap-0">
-                      {itSection.days.map((day) => (
-                        <div key={`${itSection.itinerary.id}-${day.originalDay}`} className="flex flex-col mb-1 bg-white rounded-2xl border border-slate-50 p-1">
+                      {itSection.days.map((day, dayIdx) => (
+                        // 使用行程 ID + 日期 + 索引，確保絕對唯一
+                        <div key={`${itSection.itinerary.id}-${day.originalDay}-${dayIdx}`} className="flex flex-col mb-1 bg-white rounded-2xl border border-slate-300 p-1">
                           <div className="overflow-x-auto custom-scrollbar">
                             <ItineraryVisualizer 
                               items={day.data.items} 
@@ -384,7 +363,7 @@ const App: React.FC = () => {
                               dayNumber={day.originalDay}
                               date={day.data.date}
                               // onSelectSpot={(spot) => handleSelectSpot(itSection.itinerary.id, spot)}
-                              // 關鍵修改：要把 e 傳給 handleSelectSpot
+                              // 要把 e 傳給 handleSelectSpot
                               onSelectSpot={(e, spot) => handleSelectSpot(e, itSection.itinerary.id, spot)}
                               metricsMap={metricsMap}
                             />
@@ -397,78 +376,36 @@ const App: React.FC = () => {
               </motion.div>
 
               {/* Right: Adjustment Panel (Collapsible) */}
+              {/* Right: Map Panel */}
               <AnimatePresence>
-                {/* 右邊展開的區塊 */}
                 {isPanelOpen && (
                   <motion.div 
-                    initial={{ width: 0, opacity: 0, x: 20 }}
-                    animate={{ width: 'auto', opacity: 1, x: 0 }}
-                    exit={{ width: 0, opacity: 0, x: 20 }}
+                    initial={{ x: 400, opacity: 0 }} // 從右邊滑入
+                    animate={{ x: 0, opacity: 1 }}
+                    exit={{ x: 400, opacity: 0 }}
                     transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    // className="hidden lg:flex flex-col gap-6 sticky top-0 h-fit pb-12 z-30"
-                    // 關鍵修改：fixed, top-0, right-0, h-screen
-                    className="fixed top-0 right-0 h-screen w-96 bg-white z-50 overflow-y-auto rounded-[1rem] border border-slate-200" // 固定在右邊
+                    // 關鍵：確保 h-full 能作用，父層必須有明確高度
+                    // className="hidden lg:flex flex-col sticky top-0 h-[calc(100vh-140px)] z-30"
+                    // 修正：使用 fixed 定位在最右邊，寬度固定 400px 
+                    className="hidden lg:flex flex-col fixed top-[72px] right-0 w-[400px] h-[calc(100vh-72px)] z-30 bg-white border-l border-slate-100"
+    
                   >
-                    <div className="w-[320px] xl:w-[400px] pt-2">
-                      {currentSpot ? (
-                        <>
-                          <div className="bg-white p-6">
-                            <div className="mb-8">
-                              <div className="flex justify-between items-start mb-1">
-                                <div className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
-                                  正在調整
-                                </div>
-                                <button 
-                                  onClick={() => setIsPanelOpen(false)}
-                                  className="text-slate-300 hover:text-slate-500 transition-colors"
-                                >
-                                  <ChevronRight size={16} />
-                                </button>
-                              </div>
-                              <h2 className="text-2xl font-black text-slate-800 mb-1 leading-tight">{currentSpot.SpotName}</h2>
-                              <div className="flex flex-col gap-1 text-slate-400 text-xs mt-2">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-slate-500">時間</span>
-                                  <span>{currentSpot.StartTime} - {currentSpot.EndTime}</span>
-                                </div>
-                                <div className="flex items-start gap-2">
-                                  <span className="font-bold text-slate-500 shrink-0">地址</span>
-                                  <span className="break-words">{currentSpot.Address}</span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* <div className="mt-4">
-                              {metricsMap[selectedSpotId] && (
-                                <>
-                                  <CustomMetricSlider 
-                                    label="偏好"
-                                    value={metricsMap[selectedSpotId].preference}
-                                    color={COLORS.preference}
-                                    onChange={(val) => handleUpdateMetrics({ preference: val })}
-                                  />
-                                  <CustomMetricSlider 
-                                    label="生理疲勞"
-                                    value={metricsMap[selectedSpotId].physical}
-                                    color={COLORS.physical}
-                                    onChange={(val) => handleUpdateMetrics({ physical: val })}
-                                  />
-                                  <CustomMetricSlider 
-                                    label="心理疲勞"
-                                    value={metricsMap[selectedSpotId].mental}
-                                    color={COLORS.mental}
-                                    onChange={(val) => handleUpdateMetrics({ mental: val })}
-                                  />
-                                </>
-                              )}
-                            </div> */}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
-                          <p className="text-slate-400 font-bold text-sm">點擊左側景點以進行調整</p>
-                        </div>
-                      )}
+                    <div className="w-full h-full p-4">
+                      {/* 這裡加入 h-full */}
+                      <div className="bg-white h-full w-full  border border-slate-100 shadow-sm overflow-hidden relative">
+                        {/* 放入剛寫好的地圖 */}
+                        <MapComponent
+                          items={processedSections} 
+                          selectedSpotId={selectedSpotId}
+                          currentSpot={currentSpot} // 直接把 App.tsx 算好的丟進去
+                          onSelectSpot={handleSelectSpot}
+                        />
+                        
+                        {/* 疊在地圖上的小標籤，裝飾用 */}
+                        {/* <div className="absolute top-6 left-6 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
+                          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">區域導覽地圖</p>
+                        </div> */}
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -501,8 +438,10 @@ const App: React.FC = () => {
                   >
                     <div className="flex justify-between items-start mb-4">
                       <div>
-                        <div className="text-[10px] font-black text-indigo-500 uppercase">景點調整</div>
-                        <h3 className="text-lg font-black text-slate-800">{currentSpot.SpotName}</h3>
+                        <div className="text-[12px] font-black text-[#F2C8A2] uppercase">
+                            景點調整
+                        </div>
+                        <h3 className="text-[22px] font-black text-slate-800">{currentSpot.SpotName}</h3>
                       </div>
                       <button 
                         onClick={() => setShowFloating(false)}
@@ -512,7 +451,7 @@ const App: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="space-y-1">
+                    <div className="space-y-6">
                       {metricsMap[selectedSpotId] && (
                         <>
                           <CustomMetricSlider 
