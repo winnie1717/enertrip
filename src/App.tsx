@@ -8,6 +8,7 @@ import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
 import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+
 const CustomMetricSlider: React.FC<{
   label: string;
   value: number;
@@ -86,6 +87,10 @@ const App: React.FC = () => {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
 
+  // 新增兩個狀態追蹤滑鼠位置與顯示開關 > 懸浮視窗用
+  const [anchorEl, setAnchorEl] = useState<{ x: number, y: number } | null>(null);
+  const [showFloating, setShowFloating] = useState(false);
+
   // Extract all unique types and date range for defaults
   const allTypes = useMemo(() => {
     const types = new Set<string>();
@@ -148,8 +153,18 @@ const App: React.FC = () => {
     return it?.result.find(item => item.DataType === "Spot" && (item as ItinerarySpot).SpotName === spotName) as ItinerarySpot;
   }, [selectedSpotId]);
 
-  const handleSelectSpot = useCallback((itineraryId: number, spot: ItinerarySpot) => {
+  //點擊景點
+  // const handleSelectSpot = useCallback((itineraryId: number, spot: ItinerarySpot) => {
+  //   setSelectedSpotId(`${itineraryId}-${spot.SpotName}`);
+  // }, []);
+  const handleSelectSpot = useCallback((e: React.MouseEvent | null, itineraryId: number, spot: ItinerarySpot) => {
     setSelectedSpotId(`${itineraryId}-${spot.SpotName}`);
+    
+    // 如果有傳入事件，就記錄座標並開啟懸浮窗
+    if (e) {
+      setAnchorEl({ x: e.clientX, y: e.clientY });
+      setShowFloating(true);
+    }
   }, []);
 
   const handleUpdateMetrics = useCallback((newMetrics: Partial<Metrics>) => {
@@ -326,10 +341,12 @@ const App: React.FC = () => {
         
       </header>
 
+      {/* 右邊展開區塊 */}
       <div className="flex-1 overflow-hidden">
-        <main className="h-full overflow-y-auto p-6">
+        <main className="h-full overflow-y-auto p-3">
           {activeTab === 'visualizer' ? (
             <div className="flex flex-col lg:flex-row gap-8 min-h-full relative">
+
               {/* Toggle Button (Bump) */}
               <motion.button
                 initial={false}
@@ -340,15 +357,14 @@ const App: React.FC = () => {
               >
                 <div className={`p-2 rounded-lg ${isPanelOpen ? 'text-slate-300' : 'text-slate-500 transition-colors'} group-hover:text-slate-500 transition-colors`}>
                   <ChevronLeft size={16} />
-                </div>
-                
+                </div> 
               </motion.button>
 
               {/* Left: Scrollable Itineraries List */}
               <motion.div 
                 layout
                 // className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}// 動態空出右邊面板的寬度
-                className={`flex-1 flex flex-col gap-4 pb-20 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
+                className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
               >
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-2">
@@ -367,7 +383,9 @@ const App: React.FC = () => {
                               itineraryId={itSection.itinerary.id}
                               dayNumber={day.originalDay}
                               date={day.data.date}
-                              onSelectSpot={(spot) => handleSelectSpot(itSection.itinerary.id, spot)}
+                              // onSelectSpot={(spot) => handleSelectSpot(itSection.itinerary.id, spot)}
+                              // 關鍵修改：要把 e 傳給 handleSelectSpot
+                              onSelectSpot={(e, spot) => handleSelectSpot(e, itSection.itinerary.id, spot)}
                               metricsMap={metricsMap}
                             />
                           </div>
@@ -380,6 +398,7 @@ const App: React.FC = () => {
 
               {/* Right: Adjustment Panel (Collapsible) */}
               <AnimatePresence>
+                {/* 右邊展開的區塊 */}
                 {isPanelOpen && (
                   <motion.div 
                     initial={{ width: 0, opacity: 0, x: 20 }}
@@ -419,7 +438,7 @@ const App: React.FC = () => {
                               </div>
                             </div>
                             
-                            <div className="mt-4">
+                            {/* <div className="mt-4">
                               {metricsMap[selectedSpotId] && (
                                 <>
                                   <CustomMetricSlider 
@@ -442,7 +461,7 @@ const App: React.FC = () => {
                                   />
                                 </>
                               )}
-                            </div>
+                            </div> */}
                           </div>
 
                           {/* {metricsMap[selectedSpotId] && <MetricCards metrics={metricsMap[selectedSpotId]} />} */}
@@ -460,6 +479,63 @@ const App: React.FC = () => {
                         <div className="bg-slate-50 p-12 rounded-[2.5rem] border border-dashed border-slate-200 text-center">
                           <p className="text-slate-400 font-bold text-sm">點擊左側景點以進行調整</p>
                         </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* 懸浮調整窗 */}
+              <AnimatePresence>
+                {showFloating && currentSpot && anchorEl && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                    // 計算位置：出現在滑鼠右方，並往上偏移一點以防擋住點擊點
+                    style={{
+                      position: 'fixed',
+                      left: anchorEl.x + 20,
+                      top: anchorEl.y - 120,
+                      zIndex: 100,
+                    }}
+                    className="w-72 bg-white/95 backdrop-blur-sm p-6 rounded-[2rem] shadow-2xl border border-slate-100"
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <div className="text-[10px] font-black text-indigo-500 uppercase">景點調整</div>
+                        <h3 className="text-lg font-black text-slate-800">{currentSpot.SpotName}</h3>
+                      </div>
+                      <button 
+                        onClick={() => setShowFloating(false)}
+                        className="p-1 hover:bg-slate-100 rounded-full text-slate-400"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+
+                    <div className="space-y-1">
+                      {metricsMap[selectedSpotId] && (
+                        <>
+                          <CustomMetricSlider 
+                            label="偏好"
+                            value={metricsMap[selectedSpotId].preference}
+                            color={COLORS.preference}
+                            onChange={(val) => handleUpdateMetrics({ preference: val })}
+                          />
+                          <CustomMetricSlider 
+                            label="生理疲勞"
+                            value={metricsMap[selectedSpotId].physical}
+                            color={COLORS.physical}
+                            onChange={(val) => handleUpdateMetrics({ physical: val })}
+                          />
+                          <CustomMetricSlider 
+                            label="心理疲勞"
+                            value={metricsMap[selectedSpotId].mental}
+                            color={COLORS.mental}
+                            onChange={(val) => handleUpdateMetrics({ mental: val })}
+                          />
+                        </>
                       )}
                     </div>
                   </motion.div>

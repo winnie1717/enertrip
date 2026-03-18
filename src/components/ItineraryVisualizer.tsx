@@ -9,7 +9,8 @@ interface ItineraryVisualizerProps {
   itineraryId: number;
   dayNumber: number;
   date: string;
-  onSelectSpot: (spot: ItinerarySpot) => void;
+  // onSelectSpot: (spot: ItinerarySpot) => void;
+  onSelectSpot: (e: React.MouseEvent, spot: ItinerarySpot) => void;//修改點擊處理
   metricsMap: Record<string, Metrics>;
 }
 
@@ -154,10 +155,22 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           .attr('x', 1).attr('y', -mentH).attr('width', 4).attr('height', mentH)
           .attr('fill', COLORS.mental).attr('rx', 1.5).attr('opacity', 0.9);
 
+        //點擊事件
+        // const spotG = layerSpots.append('g')
+        //   .attr('transform', `translate(${x}, ${centerY})`)
+        //   .style('cursor', 'pointer')
+        //   // .on('click', () => onSelectSpot(spot));
+        //   .on('click', (event: MouseEvent) => {
+        //   // 使用 d3 傳出的原生 event
+        //   onSelectSpot(event as any, spot);
+        // });
         const spotG = layerSpots.append('g')
           .attr('transform', `translate(${x}, ${centerY})`)
           .style('cursor', 'pointer')
-          .on('click', () => onSelectSpot(spot));
+          .on('click', function(event) { // D3 v6+ 會把 event 放在第一個參數
+            // 呼叫 props 傳進來的函數
+            onSelectSpot(event, spot);
+          });
 
         const innerR = 25, midR = 33, outerR = 41; 
         const arc = d3.arc<any>().innerRadius(innerR).outerRadius(outerR);
