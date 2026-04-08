@@ -3,11 +3,14 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import ItineraryVisualizer from './components/ItineraryVisualizer';
 import MetricCards from './components/MetricCards';
 import TechnicalDocs from './components/TechnicalDocs';
-import { ALL_ITINERARIES, COLORS } from './constants';
+import { COLORS } from './constants';
 import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
 import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MapComponent from './components/MapComponent';
+// src/App.tsx
+import { ALL_ITINERARIES as initialItineraries } from './constants'; // 當作預設資料
+
 
 //疲勞調整
 const CustomMetricSlider: React.FC<{
@@ -121,6 +124,22 @@ const App: React.FC = () => {
     }
   };
 
+  //連AI API
+  const [itineraries, setItineraries] = useState(initialItineraries);
+  const fetchItineraries = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/api/all-itineraries'); // 你需要在 server.js 補一個這條 API
+      const data = await response.json();
+      setItineraries(data);
+    } catch (e) {
+      console.error("無法載入資料庫", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchItineraries(); // 網頁開啟就去拿最新的
+  }, []);
+
   // Filter States
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
@@ -134,7 +153,7 @@ const App: React.FC = () => {
   // Extract all unique types and date range for defaults
   const allTypes = useMemo(() => {
     const types = new Set<string>();
-    ALL_ITINERARIES.forEach(it => {
+    itineraries.forEach(it => {
       it.result.forEach(item => {
         if (item.DataType === "Spot") {
           item.SpotType.forEach(t => types.add(t));
@@ -147,7 +166,7 @@ const App: React.FC = () => {
   const dateRange = useMemo(() => {
     let min = "";
     let max = "";
-    ALL_ITINERARIES.forEach(it => {
+    itineraries.forEach(it => {
       it.result.forEach(item => {
         if (item.DataType === "Spot") {
           if (!min || item.Date < min) min = item.Date;
@@ -165,7 +184,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const initial: Record<string, Metrics> = {};
-    ALL_ITINERARIES.forEach(itinerary => {
+    itineraries.forEach(itinerary => {
       itinerary.result.forEach(item => {
         if (item.DataType === "Spot") {
           const spot = item as ItinerarySpot;
@@ -181,7 +200,7 @@ const App: React.FC = () => {
     setMetricsMap(initial);
     
     // 預設選擇第一個行程的第一個景點
-    const firstIt = ALL_ITINERARIES[0];
+    const firstIt = itineraries[0];
     const firstSpot = firstIt.result.find(item => item.DataType === "Spot") as ItinerarySpot;
     if (firstSpot) setSelectedSpotId(`${firstIt.id}-${firstSpot.SpotName}`);
   }, []);
@@ -189,7 +208,7 @@ const App: React.FC = () => {
   const currentSpot = useMemo(() => {
     if (!selectedSpotId) return null;
     const [itId, spotName] = selectedSpotId.split('-');
-    const it = ALL_ITINERARIES.find(i => i.id === Number(itId));
+    const it = itineraries.find(i => i.id === Number(itId));
     return it?.result.find(item => item.DataType === "Spot" && (item as ItinerarySpot).SpotName === spotName) as ItinerarySpot;
   }, [selectedSpotId]);
 
@@ -215,7 +234,7 @@ const App: React.FC = () => {
     }));
   }, [selectedSpotId]);
 
-  const getDaysGrouped = (itinerary: typeof ALL_ITINERARIES[0]) => {
+  const getDaysGrouped = (itinerary: typeof itineraries[0]) => {
     const groups: Record<number, { items: ItineraryItem[], date: string }> = {};
     itinerary.result.forEach(item => {
       if (!groups[item.Day]) {
@@ -230,7 +249,7 @@ const App: React.FC = () => {
   };
 
   const processedSections = useMemo(() => {
-    return ALL_ITINERARIES
+    return itineraries
       .filter(it => {
         // Date filter: check if any spot in itinerary is within range
         const hasDateMatch = it.result.some(item => 

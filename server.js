@@ -1,18 +1,36 @@
-// === 儲存資料 ===
+// === 修改後的 server.js 開頭 ===
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import express from 'express';
+import cors from 'cors';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import fetch from 'node-fetch'; // 如果 Node 版本夠新，可以直接用全域 fetch
 
-const fs = require('fs');
-const path = require('path');
+// 在 ESM 中模擬 __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const DB_FILE = path.join(__dirname, 'database.json');
 const PREF_FILE = path.join(__dirname, 'user_preference.json');
 
-
-// ===================================
-
-const express = require('express');
-const cors = require('cors');
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 const app = express();
+
+// === 儲存資料 ===
+
+// const fs = require('fs');
+// const path = require('path');
+// const DB_FILE = path.join(__dirname, 'database.json');
+// const PREF_FILE = path.join(__dirname, 'user_preference.json');
+
+
+// // ===================================
+
+// const express = require('express');
+// const cors = require('cors');
+// const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// const app = express();
 app.use(cors());
 app.use(express.json());
 // 1. 讓伺服器能讀取同資料夾下的靜態檔案 (如 index.html)
@@ -322,7 +340,7 @@ app.post('/generate', async (req, res) => {
 
 
 // ==========================================
-// 🆕 V19 修正行程 (含黑名單記憶功能)
+//      修正行程 (含黑名單記憶功能)
 // ==========================================
 app.post('/modify', async (req, res) => {
     const { originalData, userFeedback, constraints } = req.body;
@@ -471,6 +489,15 @@ app.post('/modify', async (req, res) => {
     }
 });
 
+//前端
+app.get('/api/all-itineraries', (req, res) => {
+    if (fs.existsSync(DB_FILE)) {
+        const fileContent = fs.readFileSync(DB_FILE, 'utf-8');
+        res.json(JSON.parse(fileContent));
+    } else {
+        res.json([]);
+    }
+});
 
 app.listen(3000, () => {
     console.log('旅遊伺服器啟動中...');

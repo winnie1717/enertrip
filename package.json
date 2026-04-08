@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@types/d3": "^7.4.3",
+    "cors": "^2.8.6",
     "d3": "^7.9.0",
+    "express": "^5.2.1",
     "framer-motion": "^12.34.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.575.0",
+    "node-fetch": "^3.3.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-leaflet": "^5.0.0"
