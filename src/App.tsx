@@ -9,7 +9,7 @@ import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRi
 import { motion, AnimatePresence } from 'framer-motion';
 import MapComponent from './components/MapComponent';
 
-
+//疲勞調整
 const CustomMetricSlider: React.FC<{
   label: string;
   value: number;
@@ -51,24 +51,24 @@ const CustomMetricSlider: React.FC<{
   const percentage = ((value - 1) / 9) * 100;
 
   return (
-    <div className="mb-3 select-none">
+    <div className="mb-0 select-none">
       <div className="flex justify-between items-center mb-1.5">
-        <label className="text-[17px] font-medium text-slate-600 tracking-tight">{label}</label>
+        <label className="text-[12px] font-medium text-slate-600 tracking-tight">{label}</label>
       </div>
       <div 
         ref={trackRef}
         onMouseDown={handleMouseDown}
-        className="relative h-4 w-full bg-[#E9EDF2] rounded-full cursor-pointer flex items-center"
+        className="relative h-3 w-full bg-[#E9EDF2] rounded-full cursor-pointer flex items-center"
       >
         <div 
-          className="absolute h-full rounded-full transition-all duration-75"
+          className="absolute h-full rounded-full transition-all duration-70"
           style={{ width: `${percentage}%`, backgroundColor: color }}
         />
         <div 
-          className="absolute w-8 h-8 bg-white rounded-full z-10 flex items-center justify-center transition-all duration-75"
+          className="absolute w-6 h-6 bg-white rounded-full z-10 flex items-center justify-center transition-all duration-75"
           style={{ 
-            left: `calc(${percentage}% - 16px)`, 
-            border: `4px solid ${color}` 
+            left: `calc(${percentage}% - 12px)`, 
+            border: `2px solid ${color}` 
           }}
         />
       </div>
@@ -76,11 +76,50 @@ const CustomMetricSlider: React.FC<{
   );
 };
 
+
+
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'visualizer' | 'docs'>('visualizer');
   const [metricsMap, setMetricsMap] = useState<Record<string, Metrics>>({});
   const [selectedSpotId, setSelectedSpotId] = useState<string>("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+
+  // 後端連ai
+  // 新增狀態追蹤輸入內容與載入狀態
+  const [inputLocation, setInputLocation] = useState("台南");
+  const [inputDays, setInputDays] = useState("1");
+  const [inputPreference, setInputPreference] = useState("古蹟與美食");
+  const [isLoading, setIsLoading] = useState(false);
+
+  //建立呼叫後端 API 的函式
+  const handleGenerateItinerary = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          location: inputLocation,
+          startDate: startDate || new Date().toISOString().split('T')[0],
+          days: inputDays,
+          preference: inputPreference
+        })
+      });
+
+      const newData = await response.json();
+      
+      // 將新拿到的資料格式化後塞入你的視覺化引擎
+      // 注意：這裡你可以選擇更新全局變數或設一個新的 state 給 processedSections
+      console.log("AI 生成行程成功:", newData);
+      alert("行程已生成！請查看下方列表。");
+      
+      // 重新載入頁面或更新 State 以顯示新行程 (需配合你目前的資料驅動邏輯)
+    } catch (error) {
+      console.error("生成失敗:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Filter States
   const [startDate, setStartDate] = useState<string>("");
@@ -236,6 +275,41 @@ const App: React.FC = () => {
           </div>
         </div>
 
+
+
+      {/* 新增的 AI 輸入區塊 */}
+        <div className="flex-1 flex items-center gap-3 max-w-2xl pl-10">
+          <input 
+            type="text" 
+            placeholder="地點 (如: 台南)" 
+            className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs w-24 hover:border-indigo-200 transition-colors"
+            value={inputLocation}
+            onChange={(e) => setInputLocation(e.target.value)}
+          />
+          <input 
+            type="number" 
+            placeholder="天數" 
+            className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs w-16 hover:border-indigo-200 transition-colors"
+            value={inputDays}
+            onChange={(e) => setInputDays(e.target.value)}
+          />
+          <input 
+            type="text" 
+            placeholder="您的偏好 (例如: 適合長輩、古蹟美食...)" 
+            className="flex-1 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs hover:border-indigo-200 transition-colors"
+            value={inputPreference}
+            onChange={(e) => setInputPreference(e.target.value)}
+          />
+          <button 
+            onClick={handleGenerateItinerary}
+            disabled={isLoading}
+            className="bg-indigo-400 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-500 disabled:bg-slate-300"
+          >
+            {isLoading ? "生成中..." : "行程規劃"}
+          </button>
+        </div>
+
+
         {/* Filter Section */}
         <div className="flex-1 flex items-center gap-3 pl-10">
           <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
@@ -247,7 +321,7 @@ const App: React.FC = () => {
                 onChange={(e) => setStartDate(e.target.value)}
                 className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
               />
-              <span className="text-slate-300 text-[10px]">至</span>
+              <span className="text-slate-600 text-[10px]">至</span>
               <input 
                 type="date" 
                 value={endDate}
@@ -431,17 +505,17 @@ const App: React.FC = () => {
                       // --- 垂直位置判斷 ---
                       // 如果點擊位置在螢幕下半邊，視窗往上彈，否則往下彈
                       top: anchorEl.y > window.innerHeight / 2 
-                        ? anchorEl.y - 340  // 往上彈
+                        ? anchorEl.y - 200  // 往上彈
                         : anchorEl.y - 20,   // 往下彈
                     }}
-                    className="w-72 bg-white/95 backdrop-blur-sm p-6 rounded-[2rem] shadow-2xl border border-slate-100"
+                    className="w-60 bg-white/95 backdrop-blur-sm p-4 rounded-[1rem] shadow-2xl border border-slate-100"
                   >
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-2">
                       <div>
-                        <div className="text-[12px] font-black text-[#F2C8A2] uppercase">
+                        <div className="text-[10px] font-black text-[#F2C8A2] uppercase">
                             景點調整
                         </div>
-                        <h3 className="text-[22px] font-black text-slate-800">{currentSpot.SpotName}</h3>
+                        <div className="text-[16px] font-black text-slate-800">{currentSpot.SpotName}</div>
                       </div>
                       <button 
                         onClick={() => setShowFloating(false)}
@@ -451,7 +525,7 @@ const App: React.FC = () => {
                       </button>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-2">
                       {metricsMap[selectedSpotId] && (
                         <>
                           <CustomMetricSlider 

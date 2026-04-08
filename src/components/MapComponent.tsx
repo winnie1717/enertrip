@@ -67,7 +67,7 @@ const createCustomIcon = (color: string, isSelected: boolean) => {
         top: isSelected ? '8px' : '7px', 
         width: isSelected ? '10px' : '8px',
         height: isSelected ? '10px' : '8px',
-        backgroundColor: 'white', // 這裡的白色就是你看到的「洞」
+        backgroundColor: 'white', // 白色的洞
         borderRadius: '50%',
         zIndex: 1000
       }} />
