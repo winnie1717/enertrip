@@ -190,27 +190,44 @@ const App: React.FC = () => {
   }, [dateRange]);
 
   useEffect(() => {
-    const initial: Record<string, Metrics> = {};
-    itineraries.forEach(itinerary => {
-      itinerary.result.forEach(item => {
-        if (item.DataType === "Spot") {
-          const spot = item as ItinerarySpot;
-          const uniqueKey = `${itinerary.id}-${spot.SpotName}`;
-          initial[uniqueKey] = {
-            preference: Math.round(spot.Rating * 2),
-            physical: Math.round(spot.WalkingLoad),
-            mental: Math.round((spot.InfoLoad + spot.CrowdLevel) / 2)
-          };
-        }
-      });
-    });
-    setMetricsMap(initial);
-    
-    // 預設選擇第一個行程的第一個景點
-    const firstIt = itineraries[0];
-    const firstSpot = firstIt.result.find(item => item.DataType === "Spot") as ItinerarySpot;
-    if (firstSpot) setSelectedSpotId(`${firstIt.id}-${firstSpot.SpotName}`);
-  }, [itineraries]);
+    const initializeMetrics = async () => {
+      try {
+        // 🔴 新增：先從 Server 拿取 user_preference.json 的紀錄
+        const res = await fetch('http://localhost:3000/api/attraction-preferences');
+        const savedPrefs = await res.json();
+
+        const initial: Record<string, Metrics> = {};
+        itineraries.forEach(itinerary => {
+          itinerary.result.forEach(item => {
+            if (item.DataType === "Spot") {
+              const spot = item as ItinerarySpot;
+              const name = spot.SpotName;
+              const uniqueKey = `${itinerary.id}-${name}`;
+              
+              // 🔴 修改：檢查是否有存檔紀錄，優先使用紀錄值
+              // 🔴 檢查是否有存過紀錄，有就用紀錄，沒有就用預設
+              const saved = savedPrefs[spot.SpotName];
+              initial[uniqueKey] = {
+              preference: saved?.preference || Math.round(spot.Rating * 2),
+              physical: saved?.phyFatigue || spot.WalkingLoad, // 這裡要對應 json 裡的 phyFatigue
+              mental: saved?.menFatigue || Math.round((spot.InfoLoad + spot.CrowdLevel) / 2)
+              };
+            }
+          });
+        });
+        setMetricsMap(initial);
+
+        // 預設選擇第一個景點
+        const firstIt = itineraries[0];
+        const firstSpot = firstIt.result.find(item => item.DataType === "Spot") as ItinerarySpot;
+        if (firstSpot) setSelectedSpotId(`${firstIt.id}-${firstSpot.SpotName}`);
+      } catch (err) {
+        console.error("載入偏好紀錄失敗:", err);
+      }
+    };
+
+    initializeMetrics();
+  }, [itineraries]); // 確保行程更新時重新對齊
 
   const currentSpot = useMemo(() => {
     if (!selectedSpotId) return null;
@@ -233,12 +250,33 @@ const App: React.FC = () => {
     }
   }, []);
 
-  const handleUpdateMetrics = useCallback((newMetrics: Partial<Metrics>) => {
+  const handleUpdateMetrics = useCallback(async (newMetrics: Partial<Metrics>) => {
     if (!selectedSpotId) return;
+    
+    // 🔴 新增：從 ID 拆分出景點名稱 (例如 "1-赤崁樓" -> "赤崁樓")
+    const spotName = selectedSpotId.split('-')[1];
+
+    // 1. 本地 UI 立即更新
     setMetricsMap(prev => ({
       ...prev,
       [selectedSpotId]: { ...prev[selectedSpotId], ...newMetrics }
     }));
+
+    // 2. 🔴 新增：同步存入後端的 user_preference.json
+    try {
+      await fetch('http://localhost:3000/api/update-attraction-preference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          spotName: spotName,
+          physical: newMetrics.physical,
+          mental: newMetrics.mental,
+          preference: newMetrics.preference
+        })
+      });
+    } catch (e) {
+      console.error("同步至伺服器失敗");
+    }
   }, [selectedSpotId]);
 
   const getDaysGrouped = (itinerary: typeof itineraries[0]) => {

@@ -342,7 +342,49 @@ app.post('/generate', async (req, res) => {
     }
 });
 
+// ==========================================
+//      偏好
+// ==========================================
+app.get('/api/attraction-preferences', (req, res) => {
+    try {
+        if (fs.existsSync(PREF_FILE)) {
+            const data = fs.readFileSync(PREF_FILE, 'utf-8');
+            res.json(JSON.parse(data)); // 回傳你那份 JSON
+        } else {
+            res.json({}); // 沒檔案就回傳空物件
+        }
+    } catch (e) {
+        res.status(500).json({ error: "讀取偏好檔失敗" });
+    }
+});
+app.post('/api/update-attraction-preference', (req, res) => {
+    try {
+        const { spotName, preference, physical, mental } = req.body;
+        let prefs = {};
+        
+        // 1. 先讀取現有的檔案
+        if (fs.existsSync(PREF_FILE)) {
+            prefs = JSON.parse(fs.readFileSync(PREF_FILE, 'utf-8'));
+        }
 
+        // 2. 依照你 user_preference.json 的格式更新
+        // 注意：這裡的 key 是景點名稱，value 包含 preference, phyFatigue (生理), menFatigue (心理)
+        prefs[spotName] = {
+            ...prefs[spotName], // 保留原本沒改到的欄位
+            ...(preference !== undefined && { preference }),
+            ...(physical !== undefined && { phyFatigue: physical }),
+            ...(mental !== undefined && { menFatigue: mental })
+        };
+
+        // 3. 寫入檔案
+        fs.writeFileSync(PREF_FILE, JSON.stringify(prefs, null, 2), 'utf-8');
+        console.log(`   ✅ 已同步更新景點偏好: ${spotName}`);
+        res.json({ success: true });
+    } catch (e) {
+        console.error("更新偏好檔失敗:", e);
+        res.status(500).json({ error: "無法寫入偏好檔" });
+    }
+});
 // ==========================================
 //      修正行程 (含黑名單記憶功能)
 // ==========================================
