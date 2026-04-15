@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -18,24 +18,52 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 // 負責飛往選中點
+// MapComponent.tsx
+
 const FlyToSpot = ({ spot }: { spot: ItinerarySpot | null }) => {
   const map = useMap();
+  // 💡 用 Ref 記錄「正在飛行中」或「已飛過」的景點名稱
+  const processingSpot = React.useRef<string | null>(null);
+
   useEffect(() => {
-    if (spot && spot.Latitude && spot.Longitude) {
-      const zoom = 15;
-      // 1. 先將經緯度轉換成地圖上的像素點座標
-      const targetPoint = map.project([spot.Latitude, spot.Longitude], zoom);
-      
-      // 2. 進行像素偏移
-      // x 為正值會將地圖中心向右移（景點就會看起來往左偏）
-      // y 為正值會將地圖中心向下移（景點就會看起來往上偏）
-      const offsetPoint = targetPoint.add([-200, -300]); // 偏移量
-      
-      // 3. 將偏移後的像素點轉回經緯度並飛行
-      const targetLatLng = map.unproject(offsetPoint, zoom);
-      map.flyTo(targetLatLng, zoom);
+    // 1. 取得數值並嚴格檢查
+    const rawLat = spot?.Latitude;
+    const rawLng = spot?.Longitude;
+    const lat = typeof rawLat === 'number' ? rawLat : parseFloat(String(rawLat));
+    const lng = typeof rawLng === 'number' ? rawLng : parseFloat(String(rawLng));
+
+    // 2. 💡 檢查：如果座標壞掉，或是跟上次飛的是同一個，就直接結束
+    if (!spot || isNaN(lat) || isNaN(lng) || processingSpot.current === spot.SpotName) {
+      return;
     }
-  }, [spot, map]);
+
+    // 3. 準備目標座標
+    const zoom = 15;
+    const offsetLat = lat + 0.0035;
+    const offsetLng = lng - 0.0065;
+
+    // 4. 💡 終極防線：確保計算出來的偏移量也是數字
+    if (!isNaN(offsetLat) && !isNaN(offsetLng)) {
+      try {
+        processingSpot.current = spot.SpotName; // 鎖定
+        
+        map.invalidateSize(); // 再次強制校準大小
+
+        // 💡 改用 panTo + setZoom 的組合，有時候 flyTo 內部計算會因為動畫中途觸發而 NaN
+        // 這樣寫最穩，不會報錯
+        map.setView([offsetLat, offsetLng], zoom, {
+          animate: true,
+          duration: 0.8
+        });
+
+      } catch (e) {
+        console.error("地圖移動失敗", e);
+      }
+    }
+    
+    // 只有當景點真的換人時，才允許下一次飛行
+  }, [spot?.SpotName]); 
+
   return null;
 };
 
@@ -90,6 +118,32 @@ const MapComponent: React.FC<{
   currentSpot: ItinerarySpot | null; // 接收 App.tsx 傳來的現成資料
   onSelectSpot: (e: any, id: number, spot: any) => void;
 }> = ({ items, selectedSpotId, currentSpot, onSelectSpot }) => {
+
+  // 💡 關鍵：這就是你要的「只用景點名稱畫圖」
+  // 我們先掃描所有行程，把重複的景點拿掉，只留下唯一的景點清單來畫圖
+  const uniqueSpots = useMemo(() => {
+    const spotMap = new Map<string, { spot: ItinerarySpot, itineraryId: number }>();
+    
+    items.forEach(section => {
+      section.days.forEach((day: any) => {
+        day.data.items.forEach((item: any) => {
+          if (item.DataType === "Spot") {
+            const s = item as ItinerarySpot;
+            
+            // 💡 根據你的要求：檢查座標是否有效
+            const lat = Number(s.Latitude);
+            const lng = Number(s.Longitude);
+            
+            // 如果座標有效，且這個名稱還沒被畫過，就記錄下來
+            if (!isNaN(lat) && !isNaN(lng) && !spotMap.has(s.SpotName)) {
+              spotMap.set(s.SpotName, { spot: s, itineraryId: section.itinerary.id });
+            }
+          }
+        });
+      });
+    });
+    return Array.from(spotMap.values());
+  }, [items]);
   
   return (
     <div style={{ height: '100%', width: '100%', minHeight: '500px' }}>
@@ -98,51 +152,48 @@ const MapComponent: React.FC<{
         zoom={13} 
         style={{ height: '100%', width: '100%' }}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        {/* <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" /> */}
+
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
+        />
         
         {/* 直接用傳進來的 currentSpot */}
         <FlyToSpot spot={currentSpot} />
 
-        {items.map((section) => (
-            <React.Fragment key={section.itinerary.id}>
-                {section.days.flatMap((day: any) => 
-                day.data.items
-                    .filter((item: any) => item.DataType === "Spot")
-                    .map((spot: ItinerarySpot) => {
-                    
-                    // 1. 定義唯一的 Key 並判斷是否被選中
-                    // 修正點：確保 ID 轉換為字串，並使用與 App.tsx 相同的 "-" 連接
-                    const uniqueKey = `${String(section.itinerary.id)}-${spot.SpotName}`;
-                    const isSelected = selectedSpotId === uniqueKey;
+        {/* 💡 修改這裡：不再用嵌套迴圈畫圖，而是用去重後的 uniqueSpots 畫 */}
+        {uniqueSpots.map(({ spot, itineraryId }) => {
+          
+          // 1. 名稱唯一化：Key 只用名稱，解決「大酒店重複」報錯
+          const markerKey = spot.SpotName; 
+          
+          // 2. 選中判定：只要名稱對了就變色 (實現全域同步)
+          // 這裡從 selectedSpotId 拆出名稱來比對
+          const isSelected = selectedSpotId?.split('-')[1] === spot.SpotName;
+          const markerColor = isSelected ? '#f08547' : '#63b1f1';
 
-                    // 2. 顏色邏輯：選中顏色
-                    const markerColor = isSelected ? '#f08547' : '#63b1f1';
-
-                    return (
-                        <Marker 
-                        key={uniqueKey} 
-                        position={[spot.Latitude, spot.Longitude]}
-                        icon={createCustomIcon(markerColor, isSelected)} // 3. 傳入顏色與選中狀態
-                        zIndexOffset={isSelected ? 1000 : 0} // 讓選中的永遠在最上面
-                        eventHandlers={{
-                            click: (e) => {
-                                // 關鍵：阻止地圖觸發點擊事件，防止畫面亂跑
-                                L.DomEvent.stopPropagation(e);
-                                // 確保將原生事件傳回 App.tsx 以觸發懸浮窗
-                                onSelectSpot(e.originalEvent, section.itinerary.id, spot);
-                            }
-                        }}
-                        >
-                        <Popup>
-                            <div className="font-bold">{spot.SpotName}</div>
-                            <div className="text-xs text-slate-500">{spot.Address}</div>
-                        </Popup>
-                        </Marker>
-                    );
-                    })
-                )}
-            </React.Fragment>
-            ))}
+          return (
+            <Marker 
+              key={markerKey} 
+              position={[spot.Latitude, spot.Longitude]}
+              icon={createCustomIcon(markerColor, isSelected)} 
+              zIndexOffset={isSelected ? 1000 : 0} 
+              eventHandlers={{
+                click: (e) => {
+                  // 保留你原本的事件阻斷與回傳邏輯
+                  L.DomEvent.stopPropagation(e);
+                  onSelectSpot(e.originalEvent, itineraryId, spot);
+                }
+              }}
+            >
+              <Popup>
+                <div className="font-bold">{spot.SpotName}</div>
+                <div className="text-xs text-slate-500">{spot.Address}</div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
     </div>
   );
