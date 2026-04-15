@@ -257,10 +257,20 @@ const App: React.FC = () => {
     const spotName = selectedSpotId.split('-')[1];
 
     // 1. 本地 UI 立即更新
-    setMetricsMap(prev => ({
-      ...prev,
-      [selectedSpotId]: { ...prev[selectedSpotId], ...newMetrics }
-    }));
+    // 2. 本地 UI 連動更新：一邊改，全部改
+    setMetricsMap(prev => {
+      const nextMap = { ...prev };
+      
+      // 💡 關鍵：掃描地圖中所有的 Key (例如 1-赤崁樓, 2-赤崁樓...)
+      Object.keys(nextMap).forEach(key => {
+        // 如果這個 Key 的名稱部分與當前景點相同
+        if (key.split('-')[1] === spotName) {
+          nextMap[key] = { ...nextMap[key], ...newMetrics };
+        }
+      });
+      
+      return nextMap;
+    });
 
     // 2. 🔴 新增：同步存入後端的 user_preference.json
     try {

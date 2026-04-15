@@ -1,7 +1,17 @@
 {
   "安平古堡": {
-    "phyFatigue": 3,
-    "menFatigue": 2,
+    "phyFatigue": 4,
+    "menFatigue": 3,
     "preference": 5
+  },
+  "國華街三段": {
+    "preference": 3,
+    "phyFatigue": 8,
+    "menFatigue": 3
+  },
+  "赤崁樓": {
+    "preference": 10,
+    "phyFatigue": 2,
+    "menFatigue": 8
   }
 }
