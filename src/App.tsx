@@ -594,11 +594,21 @@ const App: React.FC = () => {
                               </p>
                               {/* 你可以根據 JSON 欄位自由增加，例如 SpotType */}
                               <div className="flex flex-wrap gap-2 mt-3">
-                                {currentSpot.SpotType.map(type => (
-                                  <span key={type} className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
-                                    #{type}
-                                  </span>
-                                ))}
+                                {/* 💡 修正點：先檢查 SpotType 是否存在，且是否為陣列 */}
+                                {Array.isArray(currentSpot.SpotType) ? (
+                                  currentSpot.SpotType.map(type => (
+                                    <span key={type} className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
+                                      #{type}
+                                    </span>
+                                  ))
+                                ) : (
+                                  // 如果不是陣列（例如是字串），就直接顯示該文字，或者顯示預設標籤
+                                  currentSpot.SpotType && (
+                                    <span className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
+                                      #{currentSpot.SpotType}
+                                    </span>
+                                  )
+                                )}
                               </div>
                               
                               

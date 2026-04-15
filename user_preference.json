@@ -16,5 +16,13 @@
   },
   "安平老街美食巡禮": {
     "preference": 8
+  },
+  "度小月擔仔麵(中正總店)": {
+    "menFatigue": 5
+  },
+  "林百貨": {
+    "preference": 6,
+    "phyFatigue": 3,
+    "menFatigue": 4
   }
 }
