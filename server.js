@@ -134,6 +134,10 @@ app.post('/generate', async (req, res) => {
     
     console.log(`請求: ${location}, ${days}天`);
 
+
+    // 1. 先把景點資料讀進來
+    const pool = JSON.parse(fs.readFileSync('attractions81.json', 'utf-8')).result;
+
     try {
         // --- 呼叫 Gemini  ---
         const prompt = `

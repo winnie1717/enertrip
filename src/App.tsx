@@ -87,12 +87,16 @@ const App: React.FC = () => {
   const [selectedSpotId, setSelectedSpotId] = useState<string>("");
   const [isPanelOpen, setIsPanelOpen] = useState(false);
 
+
   // 後端連ai
   // 新增狀態追蹤輸入內容與載入狀態
   const [inputLocation, setInputLocation] = useState("台南");
   const [inputDays, setInputDays] = useState("1");
   const [inputPreference, setInputPreference] = useState("古蹟與美食");
   const [isLoading, setIsLoading] = useState(false);
+  const today = new Date().toISOString().split('T')[0];
+  const [startDate, setStartDate] = useState<string>(today);
+  const [endDate, setEndDate] = useState<string>("");
 
   //建立呼叫後端 API 的函式
   const handleGenerateItinerary = async () => {
@@ -141,10 +145,13 @@ const App: React.FC = () => {
   }, []);
 
   // Filter States
-  const [startDate, setStartDate] = useState<string>("");
-  const [endDate, setEndDate] = useState<string>("");
-  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
+  
+  // const today = new Date().toISOString().split('T')[0];
+  // const [startDate, setStartDate] = useState<string>(today);
+  // const [startDate, setStartDate] = useState<string>("");
+  // const [endDate, setEndDate] = useState<string>("");
+  // const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  // const [isTypeDropdownOpen, setIsTypeDropdownOpen] = useState(false);
 
   // 新增兩個狀態追蹤滑鼠位置與顯示開關 > 懸浮視窗用
   const [anchorEl, setAnchorEl] = useState<{ x: number, y: number } | null>(null);
@@ -248,25 +255,36 @@ const App: React.FC = () => {
     return Object.entries(groups).sort(([a], [b]) => Number(a) - Number(b));
   };
 
+  //篩選
   const processedSections = useMemo(() => {
-    return itineraries
-      .filter(it => {
-        // Date filter: check if any spot in itinerary is within range
-        const hasDateMatch = it.result.some(item => 
-          item.DataType === "Spot" && 
-          (!startDate || item.Date >= startDate) && 
-          (!endDate || item.Date <= endDate)
-        );
-        
-        // Type filter: check if any spot in itinerary matches selected types
-        const hasTypeMatch = selectedTypes.length === 0 || it.result.some(item => 
-          item.DataType === "Spot" && item.SpotType.some(t => selectedTypes.includes(t))
-        );
+    // 如果沒有資料，直接回傳空陣列
+    if (!itineraries || itineraries.length === 0) return [];
 
-        return hasDateMatch && hasTypeMatch;
-      })
+    return itineraries
+      // 不篩選
+      // .filter(it => {
+      //   // Date filter: check if any spot in itinerary is within range
+      //   const hasDateMatch = it.result.some(item => 
+      //     item.DataType === "Spot" && 
+      //     (!startDate || item.Date >= startDate) && 
+      //     (!endDate || item.Date <= endDate)
+      //   );
+        
+      //   // Type filter: check if any spot in itinerary matches selected types
+      //   const hasTypeMatch = selectedTypes.length === 0 || it.result.some(item => 
+      //     item.DataType === "Spot" && item.SpotType.some(t => selectedTypes.includes(t))
+      //   );
+
+      //   return hasDateMatch && hasTypeMatch;
+      // })
       .map(it => {
+        // 取得該行程的所有原始資料
+        // const results = it.result || [];
+        // const filteredResults = results;
+
+        // 使用原本的輔助函式進行分組
         const days = getDaysGrouped(it);
+
         return {
           itinerary: it,
           days: days.map(([dayNum, dayData]) => ({
@@ -275,11 +293,11 @@ const App: React.FC = () => {
           }))
         };
       });
-  }, [startDate, endDate, selectedTypes]);
+  }, [itineraries]);
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <header className="bg-white px-8 py-4 flex items-center justify-between z-20 border-b border-slate-100">
+      <header className="bg-white px-8 py-4 flex items-center z-20 border-b border-slate-100">
         <div className="flex items-center gap-6 shrink-0">
           <div className="flex items-center gap-3">
             {/* <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
@@ -313,8 +331,14 @@ const App: React.FC = () => {
             onChange={(e) => setInputDays(e.target.value)}
           />
           <input 
+            type="date" 
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            className="text-xs font-bold text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 focus:outline-none cursor-pointer"
+          />
+          <input 
             type="text" 
-            placeholder="您的偏好 (例如: 適合長輩、古蹟美食...)" 
+            placeholder="偏好 (例如: 適合長輩、古蹟美食...)" 
             className="flex-1 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs hover:border-indigo-200 transition-colors"
             value={inputPreference}
             onChange={(e) => setInputPreference(e.target.value)}
@@ -329,7 +353,7 @@ const App: React.FC = () => {
         </div>
 
 
-        {/* Filter Section */}
+        {/* Filter Section 
         <div className="flex-1 flex items-center gap-3 pl-10">
           <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
             <Calendar size={14} className="text-slate-400" />
@@ -405,7 +429,9 @@ const App: React.FC = () => {
               )}
             </AnimatePresence>
           </div>
-        </div>        
+        </div>
+        */}
+                
       </header>
 
       {/* 主要畫面 */}
