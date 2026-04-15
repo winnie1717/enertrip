@@ -39,8 +39,8 @@ const FlyToSpot = ({ spot }: { spot: ItinerarySpot | null }) => {
 
     // 3. 準備目標座標
     const zoom = 15;
-    const offsetLat = lat + 0.0035;
-    const offsetLng = lng - 0.0065;
+    const offsetLat = lat - 0.0055; // 緯度：數字越大，地圖中心越往上，景點就顯得越「靠下」
+    const offsetLng = lng - 0.001; // 經度：數字越小（減更多），地圖中心越往左，景點就顯得越「靠右」
 
     // 4. 💡 終極防線：確保計算出來的偏移量也是數字
     if (!isNaN(offsetLat) && !isNaN(offsetLng)) {

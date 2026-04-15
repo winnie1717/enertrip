@@ -16,7 +16,7 @@ export const COLORS = {
   color1: '#FFFB96',
   color2: '#FFE28A',
   color3: '#FFD2A8',
-  color4: '#FFCDDB',
+  color4: '#ffe5ec',
   color5: '#CDB9FE'
 };
 

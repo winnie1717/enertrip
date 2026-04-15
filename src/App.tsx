@@ -557,9 +557,9 @@ const App: React.FC = () => {
                     className="hidden lg:flex flex-col fixed top-[72px] right-0 w-[400px] h-[calc(100vh-72px)] z-30 bg-white border-l border-slate-100"
     
                   >
-                    <div className="w-full h-full p-4">
-                      {/* 這裡加入 h-full */}
-                      <div className="bg-white h-full w-full  border border-slate-100 shadow-sm overflow-hidden relative">
+                    <div className="w-full h-full p-2">
+                      {/* 上半部：地圖 (h-1/2) */}
+                      <div className="bg-white h-1/2 w-full  border border-slate-100 shadow-sm overflow-hidden relative">
                         {/* 放入剛寫好的地圖 */}
                         <MapComponent
                           items={processedSections} 
@@ -567,11 +567,52 @@ const App: React.FC = () => {
                           currentSpot={currentSpot} // 直接把 App.tsx 算好的丟進去
                           onSelectSpot={handleSelectSpot}
                         />
-                        
-                        {/* 疊在地圖上的小標籤，裝飾用 */}
-                        {/* <div className="absolute top-6 left-6 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-sm border border-slate-100">
-                          <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">區域導覽地圖</p>
-                        </div> */}
+                      </div>
+                      {/* 下半部：景點資料展示區 (新增) */}
+                      <div className="flex-1 rounded-xl p-3 pt-1 overflow-y-auto custom-scrollbar">
+                        {currentSpot ? (
+                          <div className="flex flex-col gap-4">
+                            <div>
+                              <span className="text-xs font-black text-[#F2C8A2] uppercase tracking-widest">目前景點</span>
+                              <h3 className="text-2xl font-bold text-slate-800">{currentSpot.SpotName}</h3>
+                              <p className="text-xs text-slate-500 mt-1">{currentSpot.Address}</p>
+
+                              <div className="grid grid-cols-2 gap-3 mt-3">
+                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-100 shadow-sm">
+                                  <p className="text-xs text-slate-400 font-bold uppercase">停留時間</p>
+                                  <p className="text-sm font-bold text-slate-700">{currentSpot.StartTime} - {currentSpot.EndTime}</p>
+                                </div>
+                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-100 shadow-sm">
+                                  <p className="text-xs text-slate-400 font-bold uppercase">連絡電話</p>
+                                  <p className="text-sm font-bold text-slate-700">{currentSpot.Phone}</p>
+                                </div>
+                              </div>
+
+                              {/* <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">景點介紹</p> */}
+                              <p className="text-sm leading-relaxed text-slate-500 mt-3">
+                                {currentSpot.Description || "暫無詳細介紹資料。"}
+                              </p>
+                              {/* 你可以根據 JSON 欄位自由增加，例如 SpotType */}
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                {currentSpot.SpotType.map(type => (
+                                  <span key={type} className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
+                                    #{type}
+                                  </span>
+                                ))}
+                              </div>
+                              
+                              
+                              
+                              
+                            </div>
+                            
+                          </div>
+                        ) : (
+                          <div className="h-full flex flex-col items-center justify-center text-slate-300">
+                            <Search size={40} strokeWidth={1} />
+                            <p className="text-xs font-bold mt-2">點擊地圖景點查看資訊</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>

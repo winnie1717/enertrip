@@ -13,5 +13,8 @@
     "preference": 10,
     "phyFatigue": 2,
     "menFatigue": 8
+  },
+  "安平老街美食巡禮": {
+    "preference": 8
   }
 }
