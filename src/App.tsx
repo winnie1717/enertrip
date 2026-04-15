@@ -210,7 +210,7 @@ const App: React.FC = () => {
     const firstIt = itineraries[0];
     const firstSpot = firstIt.result.find(item => item.DataType === "Spot") as ItinerarySpot;
     if (firstSpot) setSelectedSpotId(`${firstIt.id}-${firstSpot.SpotName}`);
-  }, []);
+  }, [itineraries]);
 
   const currentSpot = useMemo(() => {
     if (!selectedSpotId) return null;
