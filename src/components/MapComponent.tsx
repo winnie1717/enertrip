@@ -26,6 +26,10 @@ const FlyToSpot = ({ spot }: { spot: ItinerarySpot | null }) => {
   const processingSpot = React.useRef<string | null>(null);
 
   useEffect(() => {
+    // 💡 關鍵：只要 spot 改變了（準備跳轉到下一個點）
+    // 就先強制關閉目前畫面上所有的 Popup
+    map.closePopup();
+
     // 1. 取得數值並嚴格檢查
     const rawLat = spot?.Latitude;
     const rawLng = spot?.Longitude;
@@ -146,13 +150,15 @@ const MapComponent: React.FC<{
   }, [items]);
   
   return (
-    <div style={{ height: '100%', width: '100%', minHeight: '500px' }}>
+    // <div style={{ height: '100%', width: '100%', minHeight: '500px' }}>
+    <div className="h-full w-full">
       <MapContainer 
         center={[22.997, 120.213]}  //初始中心點
         zoom={13} 
-        style={{ height: '100%', width: '100%' }}
+        // style={{ height: '100%', width: '100%' }}
+        className="h-full w-full"
       >
-        {/* <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" /> */}
+
 
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
