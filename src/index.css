@@ -73,6 +73,29 @@ button:focus-visible {
 
 /* 針對主內容區域隱藏滾動條 */
 main.overflow-y-auto {
-  -ms-overflow-style: none;  /* 針對 IE 和 Edge */
-  scrollbar-width: none;     /* 針對 Firefox */
+  /* -ms-overflow-style: none;  針對 IE 和 Edge */
+  /* scrollbar-width: none;     針對 Firefox */
+}
+/* 1. 設定滾動條的寬度與高度 */
+::-webkit-scrollbar {
+  width: 10px;  /* 垂直滾動條寬度 */
+  height: 10px; /* 水平滾動條高度 */
+}
+
+/* 2. 滾動條的軌道 (底色) */
+::-webkit-scrollbar-track {
+  background: transparent; /* 讓它透明，才不會有一條白白的在那裡 */
+}
+
+/* 3. 滾動條本體 (拉桿) */
+::-webkit-scrollbar-thumb {
+  background-color: #D6D3D1; /* 使用暖灰色，比較有質感 */
+  border-radius: 20px;       /* 讓拉桿變圓角 */
+  border: 2px solid transparent; /* 透過透明邊框製造一點點留白感 */
+  background-clip: content-box;
+}
+
+/* 4. 當滑鼠移上去時，讓拉桿顏色深一點點 */
+::-webkit-scrollbar-thumb:hover {
+  background-color: #A1887F; /* 變回你按鈕的棕色 */
 }

@@ -183,13 +183,56 @@ const MapComponent: React.FC<{
                 click: (e) => {
                   // 保留你原本的事件阻斷與回傳邏輯
                   L.DomEvent.stopPropagation(e);
-                  onSelectSpot(e.originalEvent, itineraryId, spot);
+                  // onSelectSpot(e.originalEvent, itineraryId, spot);
+                  // 這樣 handleSelectSpot 就不會設定 anchorEl，偏好疲勞調整窗就不會跳出來
+                  onSelectSpot(null, itineraryId, spot);
                 }
               }}
             >
               <Popup>
-                <div className="font-bold">{spot.SpotName}</div>
-                <div className="text-xs text-slate-500">{spot.Address}</div>
+                <div className="w-48 p-1 flex flex-col gap-2"> 
+    
+                  {/* 圖片容器：這裡使用 React 的 state 或直接操作 DOM 來控制顯示 */}
+                  <div 
+                    // 預設可以先不設定 display，由內層 img 的偵測結果決定
+                    className="w-full overflow-hidden rounded-lg bg-stone-100 cursor-pointer group relative"
+                    onClick={() => window.open(new URL(`../assets/img/${spot.SpotName}.png`, import.meta.url).href, '_blank')}
+                  >
+                    <img 
+                      /* 使用 Vite 的動態資源讀取方式 */
+                      src={new URL(`../assets/img/${spot.SpotName}.png`, import.meta.url).href}
+                      alt={spot.SpotName}
+                      className="w-full h-28 object-cover block"
+                      
+                      // 如果圖片檔案不存在 (44 NotFound)，會觸發此函式
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        // 找到圖片的外層容器 (div) 並將其完全隱藏
+                        if (target.parentElement) {
+                          target.parentElement.style.display = 'none';
+                        }
+                      }}
+
+                      // 選擇性：如果圖片加載成功，確保它是顯示的 (預防萬一)
+                      onLoad={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        if (target.parentElement) {
+                          target.parentElement.style.display = 'block';
+                        }
+                      }}
+                    />
+                  </div>
+                  
+                  {/* 文字資訊：這部分無論有沒有圖都會顯示 */}
+                  <div>
+                    <div className="font-bold text-stone-800 text-sm">{spot.SpotName}</div>
+                    <div className="text-[10px] text-stone-500 leading-tight mt-0.5">
+                      {spot.Address}
+                    </div>
+                  </div>
+                </div>
+                {/* <div className="font-bold">{spot.SpotName}</div>
+                <div className="text-xs text-slate-500">{spot.Address}</div> */}
               </Popup>
             </Marker>
           );

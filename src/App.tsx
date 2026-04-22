@@ -252,10 +252,21 @@ const App: React.FC = () => {
   const handleSelectSpot = useCallback((e: React.MouseEvent | null, itineraryId: number, spot: ItinerarySpot) => {
     setSelectedSpotId(`${itineraryId}-${spot.SpotName}`);
     
-    // 如果有傳入事件，就記錄座標並開啟懸浮窗
-    if (e) {
+    // // 如果有傳入事件，就記錄座標並開啟懸浮窗
+    // if (e) {
+    //   setAnchorEl({ x: e.clientX, y: e.clientY });
+    //   setShowFloating(true);
+    // }
+
+    // 💡 修改重點：只有當 e 存在，且 e.type 是 'click' (來自列表的 React 事件)
+    // 且不是來自地圖 (Map) 觸發的原始事件時，才開啟懸浮窗
+    if (e && e.type === 'click') {
       setAnchorEl({ x: e.clientX, y: e.clientY });
       setShowFloating(true);
+    } else {
+      // 💡 如果是點地圖，我們就關閉調整窗，只做選中動作
+      setShowFloating(false);
+      setAnchorEl(null);
     }
   }, []);
 
@@ -433,18 +444,18 @@ const App: React.FC = () => {
             <div className="flex flex-col lg:flex-row gap-8 min-h-full relative">
 
               {/* Toggle Button (Bump) Container - 增加一個外層來穩定交互 */}
-              <div className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center transition-all duration-500"
+              <div className="fixed top-1/2 -translate-y-1/2 z-10 flex items-center transition-all duration-500"
                   /* 打開時顯示按鈕跑到左邊 */
-                  style={{ right: isPanelOpen ? '400px' : '0px' }}>
+                  style={{ right: isPanelOpen ? '400px' : '-5px' }}>
                   
                 <motion.button
                   initial={false}
                   animate={{ scale: 1 }}
                   whileHover={{ x: -2 }} // 輕微縮小震動幅度，避免滑鼠滑出
                   onClick={() => setIsPanelOpen(!isPanelOpen)}
-                  className="bg-white border border-stone-300 border-r-0 py-2 px-1 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-stone-100 focus:outline-none"
+                  className="bg-white border border-stone-300 border-r-0 py-2 px-1 rounded-l-2xl rounded-r-none flex flex-col items-center group transition-colors hover:bg-stone-100 focus:outline-none"
                 >
-                  <div className={`p-2 rounded-lg ${isPanelOpen ? 'text-[#8D6E63]' : 'text-stone-400'} transition-colors`}>
+                  <div className={`p-2 ${isPanelOpen ? 'text-[#8D6E63]' : 'text-stone-400'} transition-colors`}>
                     {/* 根據狀態切換圖示：打開時顯示 ChevronRight，關閉時顯示 ChevronLeft */}
                     {isPanelOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
                   </div> 
@@ -457,7 +468,7 @@ const App: React.FC = () => {
                 // className={`flex-1 flex flex-col gap-4 pb-20 overflow-hidden transition-all duration-500 ${isPanelOpen ? 'lg:pr-4' : ''}`}// 動態空出右邊面板的寬度
                 // className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${isPanelOpen ? 'lg:mr-[400px]' : 'mr-0'}`} // 假設面板寬度是 400px
                 // 修正：使用 pr (padding-right) 或是讓 flex-1 自動處理寬度
-                className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all duration-500 ${
+                className={`flex-1 flex flex-col gap-4 pb-5 overflow-y-auto transition-all z-80 duration-500 ${
                   isPanelOpen ? 'lg:pr-[400px]' : 'pr-0'
                 }`}
               >
@@ -471,7 +482,7 @@ const App: React.FC = () => {
                     <div className="flex flex-col gap-0">
                       {itSection.days.map((day, dayIdx) => (
                         // 使用行程 ID + 日期 + 索引，確保絕對唯一
-                        <div key={`${itSection.itinerary.id}-${day.originalDay}-${dayIdx}`} className="flex flex-col mb-1 bg-white rounded-2xl border border-slate-300 p-1">
+                        <div key={`${itSection.itinerary.id}-${day.originalDay}-${dayIdx}`} className="flex flex-col mb-1 bg-white rounded-2xl border border-stone-300 p-1">
                           <div className="overflow-x-auto custom-scrollbar">
                             <ItineraryVisualizer 
                               items={day.data.items} 
@@ -504,12 +515,12 @@ const App: React.FC = () => {
                     // 關鍵：確保 h-full 能作用，父層必須有明確高度
                     // className="hidden lg:flex flex-col sticky top-0 h-[calc(100vh-140px)] z-30"
                     // 修正：使用 fixed 定位在最右邊，寬度固定 400px 
-                    className="hidden lg:flex flex-col fixed top-[72px] right-0 w-[400px] h-[calc(100vh-72px)] z-30 bg-white border-l border-slate-100"
+                    className="hidden lg:flex flex-col fixed top-[72px] right-0 w-[400px] h-[calc(100vh-72px)] z-80 bg-white border border-stone-300 border-r-0"
     
                   >
                     <div className="w-full h-full p-2">
                       {/* 上半部：地圖 (h-1/2) */}
-                      <div className="bg-white h-1/2 w-full border border-slate-100 overflow-hidden relative">
+                      <div className="bg-white z-80 h-1/2 w-full border border-stone-300 border-r-0 overflow-hidden relative">
                         {/* 放入剛寫好的地圖 */}
                         <MapComponent
                           items={processedSections} 
