@@ -84,8 +84,9 @@ const CustomMetricSlider: React.FC<{
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'visualizer' | 'docs'>('visualizer');
   const [metricsMap, setMetricsMap] = useState<Record<string, Metrics>>({});
-  const [selectedSpotId, setSelectedSpotId] = useState<string>("");
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [selectedSpotId, setSelectedSpotId] = useState<string>(""); //目前選中景點
+  const [isPanelOpen, setIsPanelOpen] = useState(false); //地圖區塊是否打開
+  const [showConfirmModal, setShowConfirmModal] = useState(false); //ai送出確認
 
 
   // 後端連ai
@@ -118,7 +119,11 @@ const App: React.FC = () => {
       // 將新拿到的資料格式化後塞入你的視覺化引擎
       // 注意：這裡你可以選擇更新全局變數或設一個新的 state 給 processedSections
       console.log("AI 生成行程成功:", newData);
-      alert("行程已生成！請查看下方列表。");
+
+      // 主動更新前端資料
+      await fetchItineraries();
+
+      alert("行程規劃已生成！");
       
       // 重新載入頁面或更新 State 以顯示新行程 (需配合你目前的資料驅動邏輯)
     } catch (error) {
@@ -410,11 +415,12 @@ const App: React.FC = () => {
             onChange={(e) => setInputPreference(e.target.value)}
           />
           <button 
-            onClick={handleGenerateItinerary}
+            // onClick={handleGenerateItinerary}
+            onClick={() => setShowConfirmModal(true)} // 改為開啟視窗
             disabled={isLoading}
-            className="bg-stone-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-stone-700 disabled:bg-slate-600"
+            className="bg-stone-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-stone-700 disabled:bg-stone-300"
           >
-            {isLoading ? "生成中..." : "行程規劃"}
+            {isLoading ? "生成中..." : "生成行程"}
           </button>
         </div>
                 
@@ -649,6 +655,45 @@ const App: React.FC = () => {
         <div>視覺化核心: D3.js + React SVG Engine</div>
         <div>佈局模式: 3:1 Responsive Canvas</div>
       </footer> */}
+      {/* 確認對話框 */}
+      <AnimatePresence>
+        {showConfirmModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 border border-stone-200"
+            >
+              <h3 className="text-lg font-bold text-stone-800 mb-2">確認生成行程？</h3>
+              <p className="text-sm text-stone-500">
+                即將在 <span className="font-bold text-[#8D6E63]">{inputLocation}</span> 規劃從 <span className="font-bold text-[#8D6E63]">{startDate}</span> 開始 <span className="font-bold text-[#8D6E63]">{inputDays}</span> 天的行程
+              </p>
+              <p className="text-sm text-stone-500 mb-6">
+                需求：<span className="font-bold text-[#8D6E63]">{inputPreference}</span>
+              </p>
+              
+              <div className="flex gap-3 mt-4">
+                <button 
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 px-4 py-2 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-100 transition-colors"
+                >
+                  取消
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    handleGenerateItinerary(); // 這裡才是真的送出
+                  }}
+                  className="flex-1 px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#8D6E63] hover:bg-[#795548] transition-colors"
+                >
+                  確定生成
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       
     </div>
   );

@@ -6,5 +6,14 @@
   },
   "下營北極殿": {
     "preference": 5
+  },
+  "台南火車站": {
+    "preference": 7,
+    "phyFatigue": 8,
+    "menFatigue": 10
+  },
+  "永樂市場(國華街美食)": {
+    "menFatigue": 3,
+    "preference": 3
   }
 }
