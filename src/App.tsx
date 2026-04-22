@@ -208,9 +208,13 @@ const App: React.FC = () => {
               // 🔴 檢查是否有存過紀錄，有就用紀錄，沒有就用預設
               const saved = savedPrefs[spot.SpotName];
               initial[uniqueKey] = {
-              preference: saved?.preference || Math.round(spot.Rating * 2),
-              physical: saved?.phyFatigue || spot.WalkingLoad, // 這裡要對應 json 裡的 phyFatigue
-              mental: saved?.menFatigue || Math.round((spot.InfoLoad + spot.CrowdLevel) / 2)
+                // 如果有存檔紀錄就用紀錄，否則統一預設為 5
+                preference: saved?.preference || 5, 
+                physical: saved?.phyFatigue || 5, 
+                mental: saved?.menFatigue || 5
+                // preference: saved?.preference || Math.round(spot.Rating * 2),
+                // physical: saved?.phyFatigue || spot.WalkingLoad, // 這裡要對應 json 裡的 phyFatigue
+                // mental: saved?.menFatigue || Math.round((spot.InfoLoad + spot.CrowdLevel) / 2)
               };
             }
           });
@@ -307,8 +311,8 @@ const App: React.FC = () => {
   const processedSections = useMemo(() => {
     // 如果沒有資料，直接回傳空陣列
     if (!itineraries || itineraries.length === 0) return [];
-
-    return itineraries
+    
+    // return itineraries
       // 不篩選
       // .filter(it => {
       //   // Date filter: check if any spot in itinerary is within range
@@ -325,6 +329,8 @@ const App: React.FC = () => {
 
       //   return hasDateMatch && hasTypeMatch;
       // })
+    return [...itineraries]
+      .reverse()
       .map(it => {
         // 取得該行程的所有原始資料
         // const results = it.result || [];
@@ -344,16 +350,16 @@ const App: React.FC = () => {
   }, [itineraries]);
 
   return (
-    <div className="h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <header className="bg-white px-8 py-4 flex items-center z-20 border-b border-slate-100">
+    <div className="w-full h-screen flex flex-col bg-white overflow-hidden font-sans">
+      <header className="w-full bg-[#EFEBE6] px-8 py-4 flex items-center z-20 shrink-0">
         <div className="flex items-center gap-6 shrink-0">
           <div className="flex items-center gap-3">
             {/* <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
               EnT
             </div> */}
             <div className="hidden sm:block">
-              <h1 className="text-lg font-bold text-[#9FA3A6] leading-tight">EnerTrip 
-                {/* <span className="text-indigo-600">視覺化</span> */}
+              <h1 className="text-lg font-extrabold text-[#5D4037] leading-tight">EnerTrip 
+                {/* <span className="text-stone-600">視覺化</span> */}
               </h1>
               {/* <p className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Trip Engine</p> */}
             </div>
@@ -363,143 +369,81 @@ const App: React.FC = () => {
 
 
       {/* 新增的 AI 輸入區塊 */}
-        <div className="flex-1 flex items-center gap-3 max-w-2xl pl-10">
+        <div className="flex-1 flex items-center gap-3 max-w-5xl pl-10">
+          <label className="block text-xs font-bold text-stone-500 mb-0 ml-1 uppercase tracking-wider">
+            目的地
+          </label>
           <input 
             type="text" 
             placeholder="地點 (如: 台南)" 
-            className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs w-24 hover:border-indigo-200 transition-colors"
+            className="bg-white px-3 py-2 rounded-xl border border-slate-100 text-xs w-24 hover:border-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-colors"
             value={inputLocation}
             onChange={(e) => setInputLocation(e.target.value)}
           />
+          <label className="block text-xs font-bold text-stone-500 mb-0 ml-1 uppercase tracking-wider">
+            天數
+          </label>
           <input 
             type="number" 
             placeholder="天數" 
-            className="bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs w-16 hover:border-indigo-200 transition-colors"
+            className="bg-white px-3 py-2 rounded-xl border border-slate-100 text-xs w-16 hover:border-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-colors"
             value={inputDays}
             onChange={(e) => setInputDays(e.target.value)}
           />
+          <label className="block text-xs font-bold text-stone-500 mb-0 ml-1 uppercase tracking-wider">
+            出發日期
+          </label>
           <input 
             type="date" 
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="text-xs font-bold text-slate-700 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 focus:outline-none cursor-pointer"
+            className="text-xs font-bold text-slate-700 bg-white px-3 py-2 rounded-xl border border-slate-100 hover:border-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-400 cursor-pointer"
           />
+          <label className="block text-xs font-bold text-stone-500 mb-0 ml-1 uppercase tracking-wider">
+            偏好需求
+          </label>
           <input 
             type="text" 
             placeholder="偏好 (例如: 適合長輩、古蹟美食...)" 
-            className="flex-1 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 text-xs hover:border-indigo-200 transition-colors"
+            className="flex-1 bg-white px-3 py-2 rounded-xl border border-slate-100 text-xs hover:border-stone-300 focus:outline-none focus:ring-1 focus:ring-stone-400 transition-colors"
             value={inputPreference}
             onChange={(e) => setInputPreference(e.target.value)}
           />
           <button 
             onClick={handleGenerateItinerary}
             disabled={isLoading}
-            className="bg-indigo-400 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-indigo-500 disabled:bg-slate-300"
+            className="bg-stone-500 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-stone-700 disabled:bg-slate-600"
           >
             {isLoading ? "生成中..." : "行程規劃"}
           </button>
         </div>
-
-
-        {/* Filter Section 
-        <div className="flex-1 flex items-center gap-3 pl-10">
-          <div className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors">
-            <Calendar size={14} className="text-slate-400" />
-            <div className="flex items-center gap-1">
-              <input 
-                type="date" 
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              />
-              <span className="text-slate-600 text-[10px]">至</span>
-              <input 
-                type="date" 
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-700 focus:outline-none cursor-pointer"
-              />
-            </div>
-          </div>
-
-          <div className="relative">
-            <button 
-              onClick={() => setIsTypeDropdownOpen(!isTypeDropdownOpen)}
-              className="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100 hover:border-indigo-200 transition-colors"
-            >
-              <Filter size={14} className="text-slate-400" />
-              <span className="text-xs font-bold text-slate-700 min-w-[80px] text-left">
-                {selectedTypes.length === 0 ? "全部類型" : `已選 ${selectedTypes.length} 項`}
-              </span>
-              <ChevronDown size={12} className={`text-slate-400 transition-transform ${isTypeDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-
-            <AnimatePresence>
-              {isTypeDropdownOpen && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-30" 
-                    onClick={() => setIsTypeDropdownOpen(false)} 
-                  />
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-full left-0 mt-2 w-48 bg-white border border-slate-100 rounded-2xl z-40 p-2 max-h-64 overflow-y-auto custom-scrollbar"
-                  >
-                    <div className="flex flex-col gap-1">
-                      <button
-                        onClick={() => setSelectedTypes([])}
-                        className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTypes.length === 0 ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                      >
-                        全部
-                      </button>
-                      <div className="h-px bg-slate-50 my-1" />
-                      {allTypes.map(type => (
-                        <button
-                          key={type}
-                          onClick={() => {
-                            setSelectedTypes(prev => 
-                              prev.includes(type) 
-                                ? prev.filter(t => t !== type) 
-                                : [...prev, type]
-                            );
-                          }}
-                          className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-colors ${selectedTypes.includes(type) ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50'}`}
-                        >
-                          {type}
-                          {selectedTypes.includes(type) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-600" />}
-                        </button>
-                      ))}
-                    </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
-        */}
                 
       </header>
 
       {/* 主要畫面 */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden bg-[#FFFCF9]">
         <main className="h-full overflow-y-auto p-3">
           {activeTab === 'visualizer' ? (
             <div className="flex flex-col lg:flex-row gap-8 min-h-full relative">
 
-              {/* Toggle Button (Bump) */}
-              <motion.button
-                initial={false}
-                animate={{ x: 0 }}
-                whileHover={{ x: -4 }}
-                onClick={() => setIsPanelOpen(!isPanelOpen)}
-                className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-white border border-slate-200 border-r-0 py-4 px-2 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-slate-50"
-              >
-                <div className={`p-2 rounded-lg ${isPanelOpen ? 'text-slate-300' : 'text-slate-500 transition-colors'} group-hover:text-slate-500 transition-colors`}>
-                  <ChevronLeft size={16} />
-                </div> 
-              </motion.button>
+              {/* Toggle Button (Bump) Container - 增加一個外層來穩定交互 */}
+              <div className="fixed top-1/2 -translate-y-1/2 z-50 flex items-center transition-all duration-500"
+                  /* 打開時顯示按鈕跑到左邊 */
+                  style={{ right: isPanelOpen ? '400px' : '0px' }}>
+                  
+                <motion.button
+                  initial={false}
+                  animate={{ scale: 1 }}
+                  whileHover={{ x: -2 }} // 輕微縮小震動幅度，避免滑鼠滑出
+                  onClick={() => setIsPanelOpen(!isPanelOpen)}
+                  className="bg-white border border-stone-300 border-r-0 py-2 px-1 rounded-l-2xl flex flex-col items-center group transition-colors hover:bg-stone-100 focus:outline-none"
+                >
+                  <div className={`p-2 rounded-lg ${isPanelOpen ? 'text-[#8D6E63]' : 'text-stone-400'} transition-colors`}>
+                    {/* 根據狀態切換圖示：打開時顯示 ChevronRight，關閉時顯示 ChevronLeft */}
+                    {isPanelOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                  </div> 
+                </motion.button>
+              </div>
 
               {/* Left: Scrollable Itineraries List */}
               <motion.div 
@@ -514,7 +458,7 @@ const App: React.FC = () => {
                 {processedSections.map((itSection) => (
                   <div key={itSection.itinerary.id} className="flex flex-col gap-2">
                     <div className="flex items-center gap-4 px-2">
-                      <h2 className="text-sm font-black text-[#8D8BD9] tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
+                      <h2 className="text-sm font-black text-[#8B7E74] tracking-tight uppercase">行程 {itSection.itinerary.id}</h2>
                       <div className="h-px flex-1 bg-slate-50" />
                     </div>
                     
@@ -559,7 +503,7 @@ const App: React.FC = () => {
                   >
                     <div className="w-full h-full p-2">
                       {/* 上半部：地圖 (h-1/2) */}
-                      <div className="bg-white h-1/2 w-full  border border-slate-100 shadow-sm overflow-hidden relative">
+                      <div className="bg-white h-1/2 w-full border border-slate-100 overflow-hidden relative">
                         {/* 放入剛寫好的地圖 */}
                         <MapComponent
                           items={processedSections} 
@@ -567,6 +511,7 @@ const App: React.FC = () => {
                           currentSpot={currentSpot} // 直接把 App.tsx 算好的丟進去
                           onSelectSpot={handleSelectSpot}
                         />
+                        
                       </div>
                       {/* 下半部：景點資料展示區 (新增) */}
                       <div className="flex-1 rounded-xl p-3 pt-1 overflow-y-auto custom-scrollbar">
@@ -578,11 +523,11 @@ const App: React.FC = () => {
                               <p className="text-xs text-slate-500 mt-1">{currentSpot.Address}</p>
 
                               <div className="grid grid-cols-2 gap-3 mt-3">
-                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-200 ">
                                   <p className="text-xs text-slate-400 font-bold uppercase">停留時間</p>
                                   <p className="text-sm font-bold text-slate-700">{currentSpot.StartTime} - {currentSpot.EndTime}</p>
                                 </div>
-                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-100 shadow-sm">
+                                <div className="bg-white p-2 pl-3 rounded-lg border border-slate-200 ">
                                   <p className="text-xs text-slate-400 font-bold uppercase">連絡電話</p>
                                   <p className="text-sm font-bold text-slate-700">{currentSpot.Phone}</p>
                                 </div>
@@ -597,22 +542,19 @@ const App: React.FC = () => {
                                 {/* 💡 修正點：先檢查 SpotType 是否存在，且是否為陣列 */}
                                 {Array.isArray(currentSpot.SpotType) ? (
                                   currentSpot.SpotType.map(type => (
-                                    <span key={type} className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
+                                    <span key={type} className="px-2 py-1 bg-stone-500 text-white text-xs font-bold rounded-md">
                                       #{type}
                                     </span>
                                   ))
                                 ) : (
                                   // 如果不是陣列（例如是字串），就直接顯示該文字，或者顯示預設標籤
                                   currentSpot.SpotType && (
-                                    <span className="px-2 py-1 bg-[#F2CE99] text-white text-xs font-bold rounded-md">
+                                    <span className="px-2 py-1 bg-stone-500 text-white text-xs font-bold rounded-md">
                                       #{currentSpot.SpotType}
                                     </span>
                                   )
                                 )}
                               </div>
-                              
-                              
-                              
                               
                             </div>
                             
@@ -652,7 +594,7 @@ const App: React.FC = () => {
                         ? anchorEl.y - 200  // 往上彈
                         : anchorEl.y - 20,   // 往下彈
                     }}
-                    className="w-60 bg-white/95 backdrop-blur-sm p-4 rounded-[1rem] shadow-2xl border border-slate-100"
+                    className="w-60 bg-white/95 backdrop-blur-sm p-4 rounded-[1rem] border border-slate-300"
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>

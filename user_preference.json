@@ -1,28 +1,10 @@
 {
   "安平古堡": {
-    "phyFatigue": 4,
-    "menFatigue": 3,
+    "phyFatigue": 5,
+    "menFatigue": 5,
     "preference": 5
   },
-  "國華街三段": {
-    "preference": 3,
-    "phyFatigue": 8,
-    "menFatigue": 3
-  },
-  "赤崁樓": {
-    "preference": 10,
-    "phyFatigue": 2,
-    "menFatigue": 8
-  },
-  "安平老街美食巡禮": {
-    "preference": 8
-  },
-  "度小月擔仔麵(中正總店)": {
-    "menFatigue": 5
-  },
-  "林百貨": {
-    "preference": 6,
-    "phyFatigue": 3,
-    "menFatigue": 4
+  "下營北極殿": {
+    "preference": 5
   }
 }

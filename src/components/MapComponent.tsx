@@ -92,7 +92,7 @@ const createCustomIcon = (color: string, isSelected: boolean) => {
       <div style={{
         position: 'absolute',
         // 根據標誌頭部的圓心位置進行微調
-        top: isSelected ? '8px' : '7px', 
+        top: isSelected ? '10px' : '7px', 
         width: isSelected ? '10px' : '8px',
         height: isSelected ? '10px' : '8px',
         backgroundColor: 'white', // 白色的洞
@@ -171,7 +171,7 @@ const MapComponent: React.FC<{
           // 2. 選中判定：只要名稱對了就變色 (實現全域同步)
           // 這裡從 selectedSpotId 拆出名稱來比對
           const isSelected = selectedSpotId?.split('-')[1] === spot.SpotName;
-          const markerColor = isSelected ? '#f08547' : '#63b1f1';
+          const markerColor = isSelected ? '#5D4037' : '#a0796b';
 
           return (
             <Marker 
