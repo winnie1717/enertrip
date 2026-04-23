@@ -40,7 +40,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
     //一日行程設定
     const contentWidth = Math.max(fixedTimelineLength, (items.length - 1) * itemSpacing);
     const totalWidth = contentWidth + margin.left + margin.right;
-    const totalHeight = 290;     
+    const totalHeight = 255; // 每個行程框的高度    
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
@@ -122,18 +122,18 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
       .attr('stroke-linecap', 'round');
 
     //設定整體時間軸(下軸)
-    timelineGroup.append('line')
-      .attr('x1', 0).attr('x2', fixedTimelineLength)
-      .attr('y1', 30).attr('y2', 30)
-      .attr('stroke', '#e2e8f0')
-      .attr('stroke-width', 4)
-      .attr('stroke-linecap', 'round');
+    // timelineGroup.append('line')
+    //   .attr('x1', 0).attr('x2', fixedTimelineLength)
+    //   .attr('y1', 30).attr('y2', 30)
+    //   .attr('stroke', '#e2e8f0')
+    //   .attr('stroke-width', 4)
+    //   .attr('stroke-linecap', 'round');
 
     //時間軸上標時間
     [0, 6, 12, 18, 24].forEach(h => {
       timelineGroup.append('text')
         .attr('x', timelineScale(h))
-        .attr('y', 43)
+        .attr('y', 13) //43
         .attr('text-anchor', 'middle')
         .attr('class', 'text-[9px] font-black fill-slate-500')
         .text(`${h}:00`);
@@ -157,6 +157,13 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
             .attr('stroke', '#A69296')
             .attr('stroke-width', 0.5)
             .attr('opacity', 0.25);
+
+          const startX = timelineScale(getHours(spot.StartTime));
+          const endX = timelineScale(getHours(spot.EndTime));
+          //時間軸景點畫深色線段 hightlight
+          timelineGroup.append('line')
+            .attr('x1', startX).attr('x2', endX).attr('y1', 0).attr('y2', 0)
+            .attr('stroke', '#A1887F').attr('stroke-width', 4).attr('stroke-linecap', 'butt');
         }
 
         //景點疲勞長條圖
@@ -289,13 +296,21 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         const startX = timelineScale(getHours(spot.StartTime));
         const endX = timelineScale(getHours(spot.EndTime));
         //時間軸景點畫深色線段 下軸與上軸連接
-        timelineGroup.append('line')
-          .attr('x1', x).attr('x2', (startX + endX)/2).attr('y1', 0).attr('y2', 30)
-          .attr('stroke', '#c1cad4').attr('stroke-width', 1).attr('stroke-linecap', 'butt');
+        // timelineGroup.append('line')
+        //   .attr('x1', x).attr('x2', (startX + endX)/2).attr('y1', 0).attr('y2', 30)
+        //   .attr('stroke', '#c1cad4').attr('stroke-width', 1).attr('stroke-linecap', 'butt');
         //時間軸景點畫深色線段(下軸)
         timelineGroup.append('line')
-          .attr('x1', startX).attr('x2', endX).attr('y1', 30).attr('y2', 30)
+          .attr('x1', startX).attr('x2', endX).attr('y1', 0).attr('y2', 0)
           .attr('stroke', COLORS.timelineSpot).attr('stroke-width', 4).attr('stroke-linecap', 'butt');
+
+        if (selectedSpotId === uniqueKey) {
+          //時間軸景點畫深色線段 hightlight
+          timelineGroup.append('line')
+            .attr('x1', startX).attr('x2', endX).attr('y1', 0).attr('y2', 0)
+            .attr('stroke', '#ae532f').attr('stroke-width', 7).attr('stroke-linecap', 'butt');
+        }
+
 
       } else {
         const transport = item as ItineraryTransport;
@@ -330,7 +345,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         const nextSpot = items[idx+1] as ItinerarySpot;
         if (prevSpot && nextSpot) {
           const midTime = (getHours(prevSpot.EndTime) + getHours(nextSpot.StartTime)) / 2;
-          timelineGroup.append('circle').attr('cx', timelineScale(midTime)).attr('cy', 30).attr('r', 2)
+          timelineGroup.append('circle').attr('cx', timelineScale(midTime)).attr('cy', 0).attr('r', 2)
             .attr('fill', COLORS.timelineDot).attr('stroke', 'white').attr('stroke-width', 1);
         }
       }

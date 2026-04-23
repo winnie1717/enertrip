@@ -1,16 +1,6 @@
 {
-  "安平古堡": {
-    "phyFatigue": 5,
-    "menFatigue": 5,
-    "preference": 5
-  },
   "下營北極殿": {
     "preference": 5
-  },
-  "台南火車站": {
-    "preference": 7,
-    "phyFatigue": 8,
-    "menFatigue": 10
   },
   "永樂市場(國華街美食)": {
     "menFatigue": 3,
@@ -18,5 +8,39 @@
   },
   "度小月擔仔麵 本店": {
     "preference": 5
+  },
+  "台南火車站": {
+    "preference": 5,
+    "phyFatigue": 5
+  },
+  "台南市區 (集合點)": {
+    "preference": 7,
+    "phyFatigue": 3,
+    "menFatigue": 4
+  },
+  "國立臺灣文學館": {
+    "preference": 6,
+    "menFatigue": 8,
+    "phyFatigue": 3
+  },
+  "度小月擔仔麵 (赤崁店)": {
+    "phyFatigue": 3,
+    "menFatigue": 3,
+    "preference": 6
+  },
+  "赤崁樓": {
+    "phyFatigue": 7,
+    "preference": 5,
+    "menFatigue": 3
+  },
+  "臺南孔子廟": {
+    "phyFatigue": 6,
+    "menFatigue": 4,
+    "preference": 4
+  },
+  "阿霞飯店": {
+    "preference": 7,
+    "phyFatigue": 3,
+    "menFatigue": 6
   }
 }
