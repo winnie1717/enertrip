@@ -24,7 +24,7 @@
     "phyFatigue": 3
   },
   "度小月擔仔麵 (赤崁店)": {
-    "phyFatigue": 3,
+    "phyFatigue": 2,
     "menFatigue": 3,
     "preference": 6
   },
@@ -34,7 +34,7 @@
     "menFatigue": 3
   },
   "臺南孔子廟": {
-    "phyFatigue": 6,
+    "phyFatigue": 5,
     "menFatigue": 4,
     "preference": 4
   },
@@ -42,5 +42,10 @@
     "preference": 7,
     "phyFatigue": 3,
     "menFatigue": 6
+  },
+  "安平古堡": {
+    "phyFatigue": 9,
+    "menFatigue": 7,
+    "preference": 8
   }
 }

@@ -19,7 +19,7 @@ export interface ItinerarySpot {
   InfoLoad: number;
   CrowdLevel: number;
   IndoorOutdoor: "室內" | "戶外" | "半開放";
-  WeatherType: string;
+  WeatherType: "陰天" | "多雲" | "晴到多雲" | "晴天" | "炎熱晴天" | "雨天";
   Temperature: number;
   // Fix: Added missing optional property present in constants.ts data
   IsRealCoordinate?: boolean;
@@ -28,7 +28,7 @@ export interface ItinerarySpot {
 export interface ItineraryTransport {
   DataType: "Transport";
   Day: number;
-  TransportType: string;
+  TransportType: "步行" | "腳踏車" | "汽車" | "公車" | "火車" | "高鐵";
   Distance: string;
   Duration: string;
   Speed: string;

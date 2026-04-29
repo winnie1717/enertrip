@@ -42,14 +42,14 @@
         "TransportType": "步行",
         "Distance": "0.5 km",
         "Duration": "10 min",
-        "Speed": "3 km/h",
+        "Speed": "2 km/h",
         "Cost": 0
       },
       {
         "DataType": "Spot",
         "Day": 1,
         "Date": "2026-01-08",
-        "SpotName": "下營北極殿",
+        "SpotName": "安平樹屋",
         "Address": "708台南市安平區古堡街108號",
         "Latitude": 23.0040326,
         "Longitude": 120.1597397,
@@ -111,10 +111,10 @@
       {
         "DataType": "Transport",
         "Day": 1,
-        "TransportType": "汽車",
+        "TransportType": "腳踏車",
         "Distance": "4.5 km",
         "Duration": "15 min",
-        "Speed": "18 km/h",
+        "Speed": "20 km/h",
         "Cost": 150
       },
       {
@@ -157,7 +157,7 @@
         "DataType": "Spot",
         "Day": 1,
         "Date": "2026-01-08",
-        "SpotName": "全台首學孔廟",
+        "SpotName": "台南孔子廟",
         "Address": "700台南市中西區南門路2號",
         "Latitude": 22.988,
         "Longitude": 120.203,
@@ -891,13 +891,13 @@
         "Website": "https://www.google.com/search?q=%E5%AE%89%E5%B9%B3%E5%8F%A4%E5%A0%A1",
         "StartTime": "10:55",
         "EndTime": "12:25",
-        "Rating": 4.3,
+        "Rating": 4.6,
         "Cost": 70,
         "WalkingLoad": 7,
         "InfoLoad": 8,
         "CrowdLevel": 8,
         "IndoorOutdoor": "戶外",
-        "WeatherType": "晴到多雲",
+        "WeatherType": "炎熱晴天",
         "Temperature": 22,
         "IsRealCoordinate": true
       },
@@ -2776,8 +2776,8 @@
         "Day": 1,
         "TransportType": "汽車",
         "Distance": "5.5 km",
-        "Duration": "20 min",
-        "Speed": "16 km/h",
+        "Duration": "5 min",
+        "Speed": "60 km/h",
         "Cost": 220
       },
       {
@@ -2978,7 +2978,7 @@
         "TransportType": "步行",
         "Distance": "0.3 km",
         "Duration": "5 min",
-        "Speed": "4 km/h",
+        "Speed": "2 km/h",
         "Cost": 0
       },
       {
@@ -3008,10 +3008,10 @@
       {
         "DataType": "Transport",
         "Day": 1,
-        "TransportType": "汽車",
-        "Distance": "0.8 km",
+        "TransportType": "腳踏車",
+        "Distance": "1.6 km",
         "Duration": "8 min",
-        "Speed": "20 km/h",
+        "Speed": "22 km/h",
         "Cost": 120
       },
       {

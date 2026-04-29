@@ -287,9 +287,27 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           satG.append('circle').attr('r', r).attr('fill', color).attr('opacity', 0.4).attr('clip-path', `url(#${sClipId})`);
           satG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '7px').text(icon);
         };
+        const spaceMap = {
+          // spot.IndoorOutdoor === "室內" ? 20 : spot.IndoorOutdoor === "半開放" ? 50 : 80
+          "室內": { spaceIcon: "🏠", spaceValue: 20 },
+          "半開放": { spaceIcon: "🎪", spaceValue: 50 },
+          "戶外": { spaceIcon: "⛰️", spaceValue: 80 },
+        };
+        const { spaceIcon, spaceValue } = spaceMap[spot.IndoorOutdoor];
+        const weatherMap = {
+          "陰天": { weatherIcon: "☁️", weatherValue: 10 },
+          "多雲": { weatherIcon: "🌥️", weatherValue: 20 },
+          "晴到多雲": { weatherIcon: "🌤️", weatherValue: 40 },
+          "晴天": { weatherIcon: "☀️", weatherValue: 60 },
+          "炎熱晴天": { weatherIcon: "🥵", weatherValue: 80 },
+          "雨天": { weatherIcon: "🌧️", weatherValue: 90 },
+        };
+        const { weatherIcon, weatherValue } = weatherMap[spot.WeatherType];
         drawSat("walk", -60, "👣", (spot.WalkingLoad/10)*100, COLORS.physical);
-        drawSat("space", -30, spot.IndoorOutdoor === "室內" ? "🏠" : "🌳", 50, COLORS.physical);
-        drawSat("weather", 0, "☀️", 80, COLORS.physical);
+        // drawSat("space", -30, "⛰️", SpaceValue, COLORS.physical);
+        drawSat("space", -30, spaceIcon, spaceValue, COLORS.physical);
+        // drawSat("weather", 0, "☀️", 80, COLORS.physical);
+        drawSat("weather", 0, weatherIcon, weatherValue, COLORS.physical);
         drawSat("crowd", 30, "👥", (spot.CrowdLevel/10)*100, COLORS.mental);
         drawSat("info", 60, "ℹ️", (spot.InfoLoad/10)*100, COLORS.mental);
 
@@ -318,14 +336,24 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         const innerR = 10, outerR = 14;
 
         transG.append('circle').attr('r', innerR).attr('fill', 'white').attr('stroke', '#e2e8f0').attr('stroke-width', 0.8);
-        transG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '7px').text(transport.TransportType === "步行" ? "👣" : "🚗");
+        const transportIconMap = {
+          "步行": "👣",
+          "腳踏車": "🚲",
+          "汽車": "🚗",
+          "公車": "🚌",
+          "火車": "🚆",
+          "高鐵": "🚄"
+        };
+        transG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '7px').text(transportIconMap[transport.TransportType] ?? "👣");
 
+        // 距離（上半圓）
         const distVal = parseNum(transport.Distance);
         const maxDistRef = 5, distPerc = Math.min(1, distVal / maxDistRef);
         const distArc = d3.arc<any>().innerRadius(innerR).outerRadius(outerR);
         transG.append('path').attr('d', distArc({ startAngle: 1.5 * Math.PI, endAngle: 2.5 * Math.PI })).attr('fill', '#f8fafc');
         transG.append('path').attr('d', distArc({ startAngle: 1.5 * Math.PI, endAngle: 1.5 * Math.PI + (distPerc * Math.PI) })).attr('fill', '#4ade80').attr('opacity', 0.8);
 
+        // 時間（下半圓）
         const durVal = parseNum(transport.Duration);
         const maxDurRef = 30, durPerc = Math.min(1, durVal / maxDurRef);
         const durArc = d3.arc<any>().innerRadius(innerR).outerRadius(outerR);
