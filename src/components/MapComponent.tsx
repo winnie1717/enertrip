@@ -171,20 +171,36 @@ const MapComponent: React.FC<{
         {/* 💡 修改這裡：不再用嵌套迴圈畫圖，而是用去重後的 uniqueSpots 畫 */}
         {uniqueSpots.map(({ spot, itineraryId }) => {
           
-          // 1. 名稱唯一化：Key 只用名稱，解決「大酒店重複」報錯
+          // 名稱唯一化：Key 只用名稱，解決「大酒店重複」報錯
           const markerKey = spot.SpotName; 
-          
-          // 2. 選中判定：只要名稱對了就變色 (實現全域同步)
+
+          // 先從選中的 ID 字串拆出行程 ID
+          // selectedSpotId 可能長這樣: "1-奇美博物館"
+          const selectedItineraryId = selectedSpotId ? parseInt(selectedSpotId.split('-')[0]) : null;
+
+          // 定義「同行程且同天」的條件
+          // 比對當前點的行程 ID 與選中點的行程 ID 是否一致
+          // 並且比對天數 (Day) 是否一致
+          const isTargetDay = currentSpot && 
+                            itineraryId === selectedItineraryId && // 確保是同一個行程 (例如 行程 1)
+                            spot.Day === currentSpot.Day;          // 確保是同一天 (例如 Day 1)
+
+          // 選中判定：只要名稱對了就變色 (實現全域同步)
           // 這裡從 selectedSpotId 拆出名稱來比對
           const isSelected = selectedSpotId?.split('-')[1] === spot.SpotName;
-          const markerColor = isSelected ? '#5D4037' : '#a0796b';
+          
+          // 設定顏色
+          // const markerColor = isSelected ? '#5D4037' : '#a0796b';
+          let markerColor = '#b18676'; // 預設
+          if (isTargetDay) markerColor = '#5D4037'; // 同一天
+          if (isSelected) markerColor = '#5D4037';  // 正選中
 
           return (
             <Marker 
               key={markerKey} 
               position={[spot.Latitude, spot.Longitude]}
               icon={createCustomIcon(markerColor, isSelected)} 
-              zIndexOffset={isSelected ? 1000 : 0} 
+              zIndexOffset={isSelected ? 1000 : (isTargetDay ? 500 : 0)} 
               eventHandlers={{
                 click: (e) => {
                   // 保留你原本的事件阻斷與回傳邏輯
