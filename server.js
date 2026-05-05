@@ -1,4 +1,4 @@
-// === 修改後的 server.js 開頭 ===
+import 'dotenv/config'; // 👈 1. 新增這一行，它會自動讀取 .env
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -42,7 +42,14 @@ app.get('/', (req, res) => {
 });
 
 //  API Key
-const API_KEY = "AIzaSyDHMKy9VGMctSpmM-3unAfV1kZ0L1w4lJI"; 
+const API_KEY = process.env.GEMINI_API_KEY; 
+
+
+if (!API_KEY) {
+    console.error("❌ 錯誤：找不到 API Key！請檢查 .env 檔案是否存在。");
+    process.exit(1); // 沒鑰匙就關閉伺服器，避免後續報錯
+}
+
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview"
@@ -545,6 +552,11 @@ app.get('/api/all-itineraries', (req, res) => {
     }
 });
 
-app.listen(3000, () => {
-    console.log('旅遊伺服器啟動中...');
+// app.listen(3000, () => {
+//     console.log('旅遊伺服器啟動中...');
+// });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`旅遊伺服器已在連接埠 ${PORT} 啟動...`);
 });

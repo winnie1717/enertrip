@@ -30,8 +30,8 @@
   },
   "赤崁樓": {
     "phyFatigue": 7,
-    "preference": 5,
-    "menFatigue": 3
+    "preference": 6,
+    "menFatigue": 4
   },
   "臺南孔子廟": {
     "phyFatigue": 5,
@@ -44,8 +44,17 @@
     "menFatigue": 6
   },
   "安平古堡": {
-    "phyFatigue": 9,
-    "menFatigue": 7,
+    "phyFatigue": 7,
+    "menFatigue": 6,
     "preference": 8
+  },
+  "周氏蝦捲 (總店)": {
+    "preference": 6,
+    "phyFatigue": 4,
+    "menFatigue": 3
+  },
+  "安平樹屋": {
+    "menFatigue": 5,
+    "phyFatigue": 7
   }
 }
