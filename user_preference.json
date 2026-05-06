@@ -1,3 +1,7 @@
 {
- 
+  "赤崁樓": {
+    "preference": 10,
+    "phyFatigue": 10,
+    "menFatigue": 9
+  }
 }

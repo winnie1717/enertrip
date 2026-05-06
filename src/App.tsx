@@ -124,7 +124,23 @@ const App: React.FC = () => {
       // 主動更新前端資料
       await fetchItineraries();
 
+      // 1. 先抓取回傳的資料
+
+      // 2. 檢查 HTTP 狀態碼或是資料內是否有 error 欄位
+      if (!response.ok || newData.error) {
+          // 如果後端傳回 500/503 或自定義的 error 訊息
+          console.error("生成失敗詳情:", newData.error);
+          alert(`Gemini 伺服器忙碌中，請稍後重試 QQ`);
+          // alert(`生成失敗：${newData.error || "Google 伺服器忙碌中，請稍後重試 (๑•̀ㅂ•́)و✧"}`);
+          setIsLoading(false);
+          return; // 👈 重要：在這裡直接攔截，不讓它執行後續開啟視窗的動作
+      }
+
+      // 3. 只有成功拿到資料，才會執行到這裡
+      setItineraries(newData);
       alert("行程規劃已生成！");
+
+      // alert("行程規劃已生成！");
       
       // 重新載入頁面或更新 State 以顯示新行程 (需配合你目前的資料驅動邏輯)
     } catch (error) {
@@ -149,6 +165,8 @@ const App: React.FC = () => {
   useEffect(() => {
     fetchItineraries(); // 網頁開啟就去拿最新的
   }, []);
+
+  
 
   // Filter States
   

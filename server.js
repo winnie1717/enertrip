@@ -1,5 +1,6 @@
 import 'dotenv/config'; // 👈 1. 新增這一行，它會自動讀取 .env
 import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
@@ -16,21 +17,6 @@ const PREF_FILE = path.join(__dirname, 'user_preference.json');
 
 const app = express();
 
-// === 儲存資料 ===
-
-// const fs = require('fs');
-// const path = require('path');
-// const DB_FILE = path.join(__dirname, 'database.json');
-// const PREF_FILE = path.join(__dirname, 'user_preference.json');
-
-
-// // ===================================
-
-// const express = require('express');
-// const cors = require('cors');
-// const { GoogleGenerativeAI } = require("@google/generative-ai");
-
-// const app = express();
 app.use(cors());
 app.use(express.json());
 // 1. 讓伺服器能讀取同資料夾下的靜態檔案 (如 index.html)
@@ -52,8 +38,10 @@ if (!API_KEY) {
 
 
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview"
-        //  gemini-2.5-flash , gemini-2.5-flash-lite , gemini-3-flash , gemini-3-flash-preview
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"
+        // gemini-2.5-flash , gemini-3-flash-preview , gemini-2.5-flash-lite , gemini-3.1-flash-lite-preview
+        // gemini-2.5-flash-lite-preview-09-2025
+        // gemini-2.5-pro , gemini-3.1-pro-preview , gemini-3.1-pro-preview-customtools
     });
 
 // ---  自動重試函式 (對付 503 塞車用) ---
@@ -75,7 +63,7 @@ async function generateWithRetry(prompt, retries = 3) {
         }
     }
     throw new Error("Google AI 伺服器太忙碌，重試 3 次後宣告失敗，請稍後再試。");
-    //const result = await generateWithRetry(prompt);
+    // const result = await generateWithRetry(prompt); //重試
 }
 
 // 補上這個變數宣告，就不會報錯了
@@ -143,23 +131,85 @@ app.post('/generate', async (req, res) => {
     console.log(`請求: ${location}, ${days}天`);
 
 
-    // 1. 先把景點資料讀進來
-    const pool = JSON.parse(fs.readFileSync('attractions81.json', 'utf-8')).result;
+    // 先把景點資料讀進來
+    // const pool = JSON.parse(fs.readFileSync('attractions81.json', 'utf-8')).result;
+
+    // // 讀取 user_preference.json
+    // 1. 確保使用 PREF_FILE 並預設為物件
+    let historyPref = {}; 
+    try {
+        const data = await fsPromises.readFile(PREF_FILE, 'utf8');
+        if (data && data.trim()) {
+            // 解析 JSON
+            const parsedData = JSON.parse(data);
+            console.log("📂 檔案原始內容:", JSON.stringify(parsedData));
+            
+            // 強制檢查：確保它是個物件，如果意外讀到陣列則轉回物件（防呆）
+            if (Array.isArray(parsedData)) {
+                historyPref = parsedData.reduce((acc, curr) => {
+                    acc[curr.spotName] = curr;
+                    return acc;
+                }, {});
+            } else {
+                historyPref = parsedData;
+            }
+
+            // 💡 關鍵修正：物件要用 Object.keys().length 才能拿數量
+            const prefCount = Object.keys(historyPref).length;
+            console.log(`✅ 成功讀取 ${prefCount} 筆偏好紀錄`);
+        }
+    } catch (err) {
+        console.log("⚠️ 尚未有偏好紀錄或讀取失敗，將以預設方式生成");
+        historyPref = {};
+    }
+
+    // 2. 轉換為 Prompt 內容：對應你 JSON 裡的 phyFatigue 和 menFatigue
+    const historyContext = Object.keys(historyPref).length > 0 
+        ? Object.entries(historyPref).map(([name, detail]) => 
+            `- ${name}: 生理疲勞=${detail.phyFatigue || 5}, 心理疲勞=${detail.menFatigue || 5}, 偏好=${detail.preference || 5}`
+        ).join('\n')
+        : "尚無歷史紀錄";
+
+    console.log("=== 注入 Prompt 的內容 ===");
+    console.log(historyContext);
 
     try {
         // --- 呼叫 Gemini  ---
         const prompt = `
             你是一個嚴格執行規則的學術旅遊資料生成器。請基於真實地理數據回傳 JSON。
+            為使用者規劃一份位於 ${location} ，從 ${startDate} 開始 ${days} 天的行程，且盡量滿足使用者的需求 ${preference} 以及偏好 ${historyContext}。
             
             【輸入條件】
             地點: ${location}
             日期: ${startDate}
             天數: ${days}
-            偏好: ${preference}
+            需求: ${preference}
+            偏好 (請務必優先參考): ${historyContext}
+
+            【偏好說明 (只包含使用者有填寫的項目)】
+            1. **評分說明**：
+                1-10分。
+
+            2.  **偏好與喜好程度**：
+                - 分數越高越喜歡。
+
+            3.  **生理疲勞**： 
+                - 分數越高，越累，此為體力上、生理上的累。
+                - 步行量越多越累。
+                - 戶外比室內累，從不累到最累為：室內<半開放<戶外。
+                - 下雨最麻煩最累、天氣熱比陰天累，天熱從不累到最累為：陰天<多雲<晴到多雲<晴天<炎熱晴天<雨天。
+
+            4.  **心理疲勞**：
+                - 分數越高，越心累，此為心情上的累 (如人潮多、資訊量大，則越心累)。
+
+            5.  **推測邏輯**：
+                - 同類型的景點可以互相推測。
+                - 如兩個景點的 SpotType: ["文化", "古蹟", "風景"] 皆相同，則推測使用者的偏好可能類似，可以此為依據規劃行程。
 
             【規則一：嚴格路徑結構 (Topology)】(必須遵守)
             1. **Day 1 結構**：
                [景點/抵達點] -> [交通] -> [景點] -> ... -> [交通] -> [當日住宿飯店]
+               *(注意：如果旅遊天數只有一天，則不會有飯店，代表沒有住宿點)*
             
             2. **Day 2 (及之後) 結構**：
                **[出發飯店]** -> [交通] -> [景點] -> [交通] -> ... -> [交通] -> [當日住宿飯店]
@@ -172,10 +222,13 @@ app.post('/generate', async (req, res) => {
             1. **每日第一站 (若為飯店)**：
                StartTime 必須是 "00:00"。
                EndTime 為出發時間 (例如 "09:00")。
+
             2. **每日最後一站 (若為飯店)**：
                StartTime 為抵達時間 (例如 "21:00")。
                EndTime 必須是 "24:00"。
-            3. 其他景點的時間必須連續且合理。
+
+            3. **其他景點的時間必須連續且合理**：
+               確保 TravelTime + EndTime 的加總邏輯正確，下一站的 StartTime 必須大於等於前一站交通的抵達時間。
 
             【規則三：欄位值限制 (Enum)】(只能從清單選擇)
             
@@ -209,7 +262,7 @@ app.post('/generate', async (req, res) => {
                 "DataType": "Spot",
                 "Day": (數字),
                 "Date": "YYYY-MM-DD",
-                "SpotName": (字串),
+                "SpotName": (字串, 景點名稱, 不需要括號英文),
                 "Address": (字串, 請提供真實地址),       
                 "Latitude": (數字, 例如 25.0339),   
                 "Longitude": (數字, 例如 121.5644),
@@ -241,6 +294,23 @@ app.post('/generate', async (req, res) => {
             }
 
             請直接回傳純 JSON Array，不要有 Markdown (\`\`\`)。
+            
+            【規則六：偏好的參考方式】
+            1. **檢查偏好清單**：
+            - 加入景點前，優先檢查是否已存在偏好紀錄，若已存在紀錄，則考量下列 2-4 點決定是否加入行程。
+            - 疲勞過高，意為只要生理疲勞或心理疲勞其中一個過高就符合。
+
+            2. **高偏好保留**：
+            - 即使疲勞較高，因為使用者偏好較高，很喜歡因此**必須保留**。
+            - 若疲勞過高，可以減少該景點停留時間。
+            - 若疲勞過高且停留時間已經非常短，則刪除當天其他「低偏好」或「未評分」的景點來保留體力 (Trade-off)。
+                    
+            3. **高疲勞且低偏好移除**：
+            - 若偏好不高，且高疲勞，**必須移除** 並替換成其他符合需求和疲勞(可根據偏好推測)的景點。
+                    
+            4. **低偏好移除**：
+            - 替換成其他符合需求和偏好(可根據偏好推測)的景點。
+
         `;
 
         const result = await model.generateContent(prompt);
@@ -424,16 +494,19 @@ app.post('/modify', async (req, res) => {
 
         // --- 準備 Prompt (加入歷史紀錄) ---
         const prompt = `
-                    你是一個旅遊行程修復師。請根據使用者的「偏好、生理疲勞、心理疲勞」回饋調整行程。
+                    你是一個嚴格執行規則的旅遊行程修復師。請基於真實地理數據回傳 JSON。
+                    根據使用者的「偏好、生理疲勞、心理疲勞」回饋調整行程。
+                    為使用者規劃一份位於 ${constraints.location} ，從 ${constraints.startDate} 開始 ${constraints.days} 天的行程，且盡量滿足使用者的需求： ${constraints.preference} 。
 
-                    【背景】地點:${constraints.location}, 日期:${constraints.startDate}, 天數:${constraints.days}, 原偏好:${constraints.preference}
+                    【背景】
+                    地點:${constraints.location}, 日期:${constraints.startDate}, 天數:${constraints.days}, 偏好:${constraints.preference}
 
                     【原始資料】
                     ${JSON.stringify(originalData)}
-                    * 請根據原始資料，規劃出新的且符合背景的行程
+                    * 請根據原始資料，規劃出新的且符合使用者回饋與新需求的行程
 
-                    【⚠️ 歷史黑名單資料 (History Blacklist)】
-                    (請參考此處，若某景點曾被評為偏好 <= 3，絕對禁止再次加入！)
+                    【歷史黑名單資料 (History Blacklist)】
+                    (請參考此處，使用者的景點的回饋)
                     ${JSON.stringify(historyPref)}
 
                     【使用者回饋 (只包含使用者有填寫的項目)】
