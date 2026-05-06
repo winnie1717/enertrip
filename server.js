@@ -62,6 +62,7 @@ async function generateWithRetry(prompt, retries = 3) {
         try {
             // 嘗試呼叫 AI
             const result = await model.generateContent(prompt);
+            console.log("Token 使用量統計:", result.response.usageMetadata);
             return result; // 成功就回傳
         } catch (error) {
             // 如果是 503 (忙碌) 或 500 (錯誤)，就重試
@@ -243,6 +244,7 @@ app.post('/generate', async (req, res) => {
         `;
 
         const result = await model.generateContent(prompt);
+        console.log("Token 使用量統計:", result.response.usageMetadata);
         const response = await result.response;
         let text = response.text();
 
@@ -428,6 +430,7 @@ app.post('/modify', async (req, res) => {
 
                     【原始資料】
                     ${JSON.stringify(originalData)}
+                    * 請根據原始資料，規劃出新的且符合背景的行程
 
                     【⚠️ 歷史黑名單資料 (History Blacklist)】
                     (請參考此處，若某景點曾被評為偏好 <= 3，絕對禁止再次加入！)
@@ -466,6 +469,7 @@ app.post('/modify', async (req, res) => {
                 `;
 
         const result = await model.generateContent(prompt);
+        console.log("Token 使用量統計:", result.response.usageMetadata);
         const response = await result.response;
         let text = response.text().replace(/```json/g, '').replace(/```/g, '').trim();
         

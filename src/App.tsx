@@ -5,7 +5,7 @@ import MetricCards from './components/MetricCards';
 import TechnicalDocs from './components/TechnicalDocs';
 import { COLORS } from './constants';
 import { type ItinerarySpot, type Metrics, type ItineraryItem } from './types';
-import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders } from 'lucide-react';
+import { Calendar, Filter, ChevronDown, Search, Settings, ChevronLeft, ChevronRight, Sliders, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import MapComponent from './components/MapComponent';
 // src/App.tsx
@@ -87,6 +87,7 @@ const App: React.FC = () => {
   const [selectedSpotId, setSelectedSpotId] = useState<string>(""); //目前選中景點
   const [isPanelOpen, setIsPanelOpen] = useState(false); //地圖區塊是否打開
   const [showConfirmModal, setShowConfirmModal] = useState(false); //ai送出確認
+  const [showLegend, setShowLegend] = useState(false);//legend
 
 
   // 後端連ai
@@ -434,6 +435,98 @@ const App: React.FC = () => {
             {isLoading ? "生成中..." : "生成行程"}
           </button>
         </div>
+        {/* 包裹按鈕與 Legend 的容器，加上 relative 確保定位基準 */}
+        <div className="relative flex items-center">
+          {/* 問號小圖標 */}
+          <button 
+            onMouseEnter={() => setShowLegend(true)}
+            onMouseLeave={() => setShowLegend(false)}
+            onClick={() => setShowLegend(!showLegend)} 
+            className="flex items-center justify-center text-stone-400 hover:text-[#8D6E63] transition-colors px-2 focus:outline-none"
+            title="圖例"
+          >
+            {/* 使用 HelpCircle 代替原本的文字問號，size 可以根據 header 大小調整 */}
+            <HelpCircle size={17} strokeWidth={2.5} />
+          </button>
+
+          {/* Legend 彈出視窗：改為 top-full 往下彈，並修正 left 位置 */}
+          {showLegend && (
+            <div className="absolute top-full mt-3 right-0 w-96 shrink-0 p-4 bg-white border border-gray-200 rounded-xl shadow-2xl z-[1000] animate-in fade-in slide-in-from-top-2 duration-200">
+              <div className="space-y-4 text-sm text-gray-700">
+                {/* 景點圖例 */}
+                <div>
+                  <h4 className="font-bold text-stone-500 mb-2 border-b pb-1">景點視圖
+                  </h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        {[1,2,3].map(i => <div key={i} className="w-2 h-2 rounded-full bg-[#F4A442] opacity-40" />)}
+                        {[4,5].map(i => <div key={i} className="w-2 h-2 rounded-full bg-[#D66D67] opacity-40" />)}
+                      </div>
+                      <span>步行量 | 室內戶外 | 天氣 | 人潮 | 資訊量</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="w-5 h-3 rounded-t-full border-x-4 border-t-4 border-b-0 border-4 border-[#9DB2D0] bg-transparent" />
+                      <span>偏好</span>
+                      <div className="w-5 h-3 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#F4A442] bg-transparent" />
+                      <div className="w-1 h-3 bg-[#F4A442] rounded-t-sm" />
+                      <span>生理疲勞</span>
+                      <div className="w-5 h-3 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#D66D67] bg-transparent" />
+                      <div className="w-1 h-3 bg-[#D66D67] rounded-t-sm" />
+                      <span>心理疲勞</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-4 h-4">
+                        <svg width="12" height="12" viewBox="0 0 12 12" className="overflow-visible">
+                          <path 
+                            d="M6 0L7.4 4.3H12L8.3 7L9.7 11.3L6 8.6L2.3 11.3L3.7 7L0 4.3H4.6L6 0Z" 
+                            fill="#ffae00" 
+                          />
+                        </svg>
+                      </div>
+                      <span>評價</span>
+                      <div className="w-3 h-3 bg-[#ffeba9] rounded-full" />
+                      <span>花費</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* 交通圖例 */}
+                <div>
+                  <h4 className="font-bold text-stone-500 mb-2 border-b pb-1">交通方式視圖</h4>
+                  <ul className="space-y-2">
+                    <li className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-3 h-3">
+                        <svg width="10" height="10" viewBox="-2 -4 4 4" className="overflow-visible">
+                          <path 
+                            d="M -1.5,-3 L 1.5,-3 L 0,0 Z" 
+                            fill="#f97316" 
+                          />
+                        </svg>
+                      </div>
+                      <span>速度</span>
+                      <div className="w-5 h-3 rounded-t-full border-x-4 border-t-4 border-b-0 border-4 border-[#5CE672] border-opacity-80 bg-transparent" />
+                      {/* <div className="w-3 h-3 bg-[#5CE672] rounded-full opacity-80" /> */}
+                      <span>距離</span>
+                      <div className="w-5 h-3 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#519156] border-opacity-60 bg-transparent" />
+                      {/* <div className="w-3 h-3 bg-[#519156] rounded-full opacity-60" /> */}
+                      <span>時間</span>
+                    </li>
+                    {/* <li className="flex items-center gap-2">
+                      <div className="w-8 h-0.5 border-t-2 border-dashed border-gray-400" />
+                      <span>步行 / 接駁</span>
+                    </li> */}
+                  </ul>
+                </div>
+              </div>
+              
+              {/* 小箭頭：改到上方 */}
+              <div className="absolute -top-2 right-2 w-4 h-4 bg-white border-t border-l border-gray-200 rotate-45" />
+            </div>
+          )}
+        </div>
+
+        
                 
       </header>
 

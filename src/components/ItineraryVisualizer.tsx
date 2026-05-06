@@ -285,7 +285,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           defs.append('clipPath').attr('id', sClipId).append('rect').attr('x', -r).attr('y', r - sfH).attr('width', r * 2).attr('height', sfH);
           satG.append('circle').attr('r', r).attr('fill', 'white').attr('stroke', COLORS.outline).attr('stroke-width', 0.6);
           satG.append('circle').attr('r', r).attr('fill', color).attr('opacity', 0.4).attr('clip-path', `url(#${sClipId})`);
-          satG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '7px').text(icon);
+          satG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '9px').text(icon);
         };
         const spaceMap = {
           // spot.IndoorOutdoor === "室內" ? 20 : spot.IndoorOutdoor === "半開放" ? 50 : 80
@@ -344,14 +344,14 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           "火車": "🚆",
           "高鐵": "🚄"
         };
-        transG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '7px').text(transportIconMap[transport.TransportType] ?? "👣");
+        transG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '9px').text(transportIconMap[transport.TransportType] ?? "👣");
 
         // 距離（上半圓）
         const distVal = parseNum(transport.Distance);
         const maxDistRef = 5, distPerc = Math.min(1, distVal / maxDistRef);
         const distArc = d3.arc<any>().innerRadius(innerR).outerRadius(outerR);
         transG.append('path').attr('d', distArc({ startAngle: 1.5 * Math.PI, endAngle: 2.5 * Math.PI })).attr('fill', '#f8fafc');
-        transG.append('path').attr('d', distArc({ startAngle: 1.5 * Math.PI, endAngle: 1.5 * Math.PI + (distPerc * Math.PI) })).attr('fill', '#4ade80').attr('opacity', 0.8);
+        transG.append('path').attr('d', distArc({ startAngle: 1.5 * Math.PI, endAngle: 1.5 * Math.PI + (distPerc * Math.PI) })).attr('fill', '#5CE672').attr('opacity', 0.8);
 
         // 時間（下半圓）
         const durVal = parseNum(transport.Duration);
@@ -359,7 +359,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         const durArc = d3.arc<any>().innerRadius(innerR).outerRadius(outerR);
         transG.append('path').attr('d', durArc({ startAngle: 1.5 * Math.PI, endAngle: 0.5 * Math.PI })).attr('fill', '#f8fafc');
         transG.append('path').attr('d', durArc({ startAngle: 1.5 * Math.PI, endAngle: 1.5 * Math.PI - (durPerc * Math.PI) }))
-          .attr('fill', '#3b82f6').attr('opacity', 0.5);
+          .attr('fill', '#519156').attr('opacity', 0.6);
 
         const speedVal = parseNum(transport.Speed);
         const maxSpeedRef = 60;
