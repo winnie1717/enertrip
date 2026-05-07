@@ -38,7 +38,7 @@ if (!API_KEY) {
 
 
 const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash"
+const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview"
         // gemini-2.5-flash , gemini-3-flash-preview , gemini-2.5-flash-lite , gemini-3.1-flash-lite-preview
         // gemini-2.5-flash-lite-preview-09-2025
         // gemini-2.5-pro , gemini-3.1-pro-preview , gemini-3.1-pro-preview-customtools
@@ -227,8 +227,9 @@ app.post('/generate', async (req, res) => {
                StartTime 為抵達時間 (例如 "21:00")。
                EndTime 必須是 "24:00"。
 
-            3. **其他景點的時間必須連續且合理**：
-               確保 TravelTime + EndTime 的加總邏輯正確，下一站的 StartTime 必須大於等於前一站交通的抵達時間。
+            3. **景點的時間不能重疊，必須連續且合理**：
+               確保景點的 StartTime 和 EndTime 邏輯正確，StartTime 必須小於 EndTime。
+               前一站景點的 EndTime 加上 交通時間 Duration 必須小於等於，此景點的 StartTime。
 
             【規則三：欄位值限制 (Enum)】(只能從清單選擇)
             

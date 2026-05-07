@@ -136,11 +136,10 @@ const App: React.FC = () => {
           return; // 👈 重要：在這裡直接攔截，不讓它執行後續開啟視窗的動作
       }
 
-      // 3. 只有成功拿到資料，才會執行到這裡
-      setItineraries(newData);
-      alert("行程規劃已生成！");
+      await fetchItineraries();
 
-      // alert("行程規劃已生成！");
+      alert("行程規劃已生成！");
+      
       
       // 重新載入頁面或更新 State 以顯示新行程 (需配合你目前的資料驅動邏輯)
     } catch (error) {
@@ -148,6 +147,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
+    
   };
 
   //連AI API
@@ -386,7 +386,7 @@ const App: React.FC = () => {
 
   return (
     <div className="w-full h-screen flex flex-col bg-white overflow-hidden font-sans">
-      <header className="w-full bg-[#EFEBE6] px-8 py-4 flex items-center z-20 shrink-0">
+      <header className="w-full bg-[#EFEBE6] pl-8 py-3 flex items-center z-20 shrink-0">
         <div className="flex items-center gap-6 shrink-0">
           <div className="flex items-center gap-3">
             {/* <div className="w-10 h-10 bg-pink-600 rounded-xl flex items-center justify-center text-white font-black text-xl">
@@ -453,19 +453,60 @@ const App: React.FC = () => {
             {isLoading ? "生成中..." : "生成行程"}
           </button>
         </div>
+        <div className="relative flex items-center px-6 py-0">
+          <div >
+            <ul className="space-y-0">
+                <li className="flex items-center gap-2">
+                  <div className="w-4 h-2 rounded-t-full border-x-4 border-t-4 border-b-0 border-4 border-[#9DB2D0] bg-transparent" />
+                  <span>偏好</span>
+                  {/* <div className="w-5 h-3 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#F4A442] bg-transparent" />
+                  <div className="w-1 h-3 bg-[#F4A442] rounded-t-sm" /> */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-4 h-2 rounded-b-full border-x-4 border-t-0 border-b-4 border-[#F4A442] bg-transparent"/>
+                    <div className="w-1 h-1.5 bg-[#F4A442] -mt-px"/>
+                  </div>
+                  <span>生理疲勞</span>
+                  {/* <div className="w-5 h-3 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#D66D67] bg-transparent" />
+                  <div className="w-1 h-3 bg-[#D66D67] rounded-t-sm" /> */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-4 h-2 rounded-b-full border-x-4 border-t-0 border-b-4 border-[#D66D67] bg-transparent"/>
+                    <div className="w-1 h-1.5 bg-[#D66D67] -mt-px"/>
+                  </div>
+                  <span>心理疲勞</span>
+                </li>
+                <li className="flex items-center gap-2">
+                      <div className="flex items-center justify-center w-3 h-3 pb-1 pl-1">
+                        <svg width="10" height="10" viewBox="-2 -4 4 4" className="overflow-visible">
+                          <path 
+                            d="M -1.5,-3 L 1.5,-3 L 0,0 Z" 
+                            fill="#f97316" 
+                          />
+                        </svg>
+                      </div>
+                      <span>速度</span>
+                      <div className="w-4 h-2 rounded-t-full border-x-4 border-t-4 border-b-0 border-4 border-[#5CE672] border-opacity-80 bg-transparent" />
+                      {/* <div className="w-3 h-3 bg-[#5CE672] rounded-full opacity-80" /> */}
+                      <span>距離</span>
+                      <div className="w-4 h-2 rounded-b-full border-x-4 border-t-0 border-b-4 border-4 border-[#519156] border-opacity-60 bg-transparent" />
+                      {/* <div className="w-3 h-3 bg-[#519156] rounded-full opacity-60" /> */}
+                      <span>時間</span>
+                    </li>
+              </ul>
+          </div>
+
+        </div>
         {/* 包裹按鈕與 Legend 的容器，加上 relative 確保定位基準 */}
         <div className="relative flex items-center">
           {/* 問號小圖標 */}
-          <button 
+          {/* <button 
             onMouseEnter={() => setShowLegend(true)}
             onMouseLeave={() => setShowLegend(false)}
             onClick={() => setShowLegend(!showLegend)} 
             className="flex items-center justify-center text-stone-400 hover:text-[#8D6E63] transition-colors px-2 focus:outline-none"
             title="圖例"
           >
-            {/* 使用 HelpCircle 代替原本的文字問號，size 可以根據 header 大小調整 */}
             <HelpCircle size={17} strokeWidth={2.5} />
-          </button>
+          </button> */}
 
           {/* Legend 彈出視窗：改為 top-full 往下彈，並修正 left 位置 */}
           {showLegend && (
