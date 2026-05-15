@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, AttributionControl } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { type ItinerarySpot } from '../types';
@@ -115,6 +115,7 @@ const createCustomIcon = (color: string, isSelected: boolean) => {
   });
 };
 
+
 // 主組件
 const MapComponent: React.FC<{
   items: any[];
@@ -157,13 +158,22 @@ const MapComponent: React.FC<{
         zoom={13} 
         // style={{ height: '100%', width: '100%' }}
         className="h-full w-full"
+        attributionControl={false}
       >
+        {/* 手動加上控制項，並設定在右下角 */}
+        <AttributionControl position="bottomright" prefix={false} />
 
-
+        {/* 用這段原生的 TileLayer，完全不需要外掛，直接引入真正的 Google 地圖背景 */}
+        <TileLayer
+          url="https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}"
+          // attribution='&copy; <a href="https://maps.google.com" target="_blank">Google Maps</a>'
+          attribution='© <a href="https://maps.google.com" target="_blank" rel="noreferrer">Google Maps</a>'
+        />
+{/* 
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors'
-        />
+        />  */}
         
         {/* 直接用傳進來的 currentSpot */}
         <FlyToSpot spot={currentSpot} />
