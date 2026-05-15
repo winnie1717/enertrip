@@ -337,7 +337,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
 
         transG.append('circle').attr('r', innerR).attr('fill', 'white').attr('stroke', '#e2e8f0').attr('stroke-width', 0.8);
         const transportIconMap = {
-          "步行": "👣",
+          "步行": "🚶",
           "腳踏車": "🚲",
           "汽車": "🚗",
           "公車": "🚌",

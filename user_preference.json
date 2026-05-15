@@ -1,6 +1,46 @@
 {
+  "大天后宮": {
+    "phyFatigue": 8,
+    "menFatigue": 8
+  },
   "赤崁樓": {
-    "phyFatigue": 5,
+    "preference": 9,
+    "phyFatigue": 8,
+    "menFatigue": 6
+  },
+  "安平古堡": {
+    "preference": 10,
+    "phyFatigue": 7,
+    "menFatigue": 6
+  },
+  "祀典武廟": {
+    "preference": 8,
+    "phyFatigue": 7,
+    "menFatigue": 6
+  },
+  "台南公園": {
+    "preference": 3,
+    "phyFatigue": 8,
+    "menFatigue": 8
+  },
+  "成功大學光復校區": {
+    "preference": 1,
+    "phyFatigue": 8,
+    "menFatigue": 8
+  },
+  "安平老街": {
+    "preference": 10,
+    "phyFatigue": 6,
     "menFatigue": 5
+  },
+  "安平樹屋": {
+    "preference": 3,
+    "phyFatigue": 1,
+    "menFatigue": 1
+  },
+  "漁光島": {
+    "preference": 2,
+    "phyFatigue": 6,
+    "menFatigue": 8
   }
 }
