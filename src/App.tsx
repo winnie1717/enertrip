@@ -514,7 +514,7 @@ const App: React.FC = () => {
               <div className="space-y-4 text-sm text-gray-700">
                 {/* 景點圖例 */}
                 <div>
-                  <h4 className="font-bold text-stone-500 mb-2 border-b pb-1">景點視圖
+                  <h4 className="font-bold text-stone-500 mb-2 border-b pb-1">行程點視圖
                   </h4>
                   <ul className="space-y-2">
                     <li className="flex items-center gap-2">
@@ -687,7 +687,7 @@ const App: React.FC = () => {
                         {currentSpot ? (
                           <div className="flex flex-col gap-4">
                             <div>
-                              <span className="text-xs font-black text-[#F2C8A2] uppercase tracking-widest">目前景點</span>
+                              <span className="text-xs font-black text-[#F2C8A2] uppercase tracking-widest">目前行程點</span>
                               <h3 className="text-2xl font-bold text-slate-800">{currentSpot.SpotName}</h3>
                               <p className="text-xs text-slate-500 mt-1">{currentSpot.Address}</p>
 
@@ -702,7 +702,7 @@ const App: React.FC = () => {
                                 </div>
                               </div>
 
-                              {/* <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">景點介紹</p> */}
+                              {/* <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">行程點介紹</p> */}
                               <p className="text-sm leading-relaxed text-slate-500 mt-3">
                                 {currentSpot.Description || "暫無詳細介紹資料。"}
                               </p>
@@ -731,7 +731,7 @@ const App: React.FC = () => {
                         ) : (
                           <div className="h-full flex flex-col items-center justify-center text-slate-300">
                             <Search size={40} strokeWidth={1} />
-                            <p className="text-xs font-bold mt-2">點擊地圖景點查看資訊</p>
+                            <p className="text-xs font-bold mt-2">點擊地圖行程點查看資訊</p>
                           </div>
                         )}
                       </div>
@@ -768,7 +768,7 @@ const App: React.FC = () => {
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <div className="text-[10px] font-black text-[#F2C8A2] uppercase">
-                            景點調整
+                            行程點調整
                         </div>
                         <div className="text-[16px] font-black text-slate-800">{currentSpot.SpotName}</div>
                       </div>

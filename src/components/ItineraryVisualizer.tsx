@@ -163,7 +163,7 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
           //時間軸景點畫深色線段 hightlight
           timelineGroup.append('line')
             .attr('x1', startX).attr('x2', endX).attr('y1', 0).attr('y2', 0)
-            .attr('stroke', '#A1887F').attr('stroke-width', 4).attr('stroke-linecap', 'butt');
+            .attr('stroke', '#ae532f').attr('stroke-width', 4).attr('stroke-linecap', 'butt');
         }
 
         //景點疲勞長條圖
@@ -277,14 +277,14 @@ const ItineraryVisualizer: React.FC<ItineraryVisualizerProps> = ({
         spotG.append('text').attr('y', 51.5).attr('text-anchor', 'middle').attr('class', 'sketch-font font-bold text-[10px] fill-slate-800').text(spot.SpotName);
 
         const drawSat = (satId: string, angle: number, icon: string, percentage: number, color: string) => {
-          const rad = (angle - 90) * (Math.PI / 180), dist = 52; 
-          const sx = Math.cos(rad) * dist, sy = Math.sin(rad) * dist, r = 9; 
+          const rad = (angle - 90) * (Math.PI / 180), dist = 56; 
+          const sx = Math.cos(rad) * dist, sy = Math.sin(rad) * dist, r = 13; 
           const satG = spotG.append('g').attr('transform', `translate(${sx}, ${sy})`);
           const sClipId = `sat-clip-${idx}-${satId}-${spot.Day}-${itineraryId}`;
           const sfH = (percentage / 100) * (r * 2);
           defs.append('clipPath').attr('id', sClipId).append('rect').attr('x', -r).attr('y', r - sfH).attr('width', r * 2).attr('height', sfH);
           satG.append('circle').attr('r', r).attr('fill', 'white').attr('stroke', COLORS.outline).attr('stroke-width', 0.6);
-          satG.append('circle').attr('r', r).attr('fill', color).attr('opacity', 0.4).attr('clip-path', `url(#${sClipId})`);
+          satG.append('circle').attr('r', r).attr('fill', color).attr('opacity', 0.5).attr('clip-path', `url(#${sClipId})`);
           satG.append('text').attr('text-anchor', 'middle').attr('dy', '0.35em').attr('font-size', '9px').text(icon);
         };
         const spaceMap = {
